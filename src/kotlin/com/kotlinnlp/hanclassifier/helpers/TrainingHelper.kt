@@ -131,6 +131,8 @@ class TrainingHelper(
 
     val accuracy = this.validateEpoch(validationSet)
 
+    println("Accuracy: %.2f%%".format(100.0 * accuracy))
+
     if (modelFilename != null && accuracy > this.bestAccuracy) {
 
       this.bestAccuracy = accuracy
