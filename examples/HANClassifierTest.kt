@@ -38,5 +38,7 @@ fun main(args: Array<String>) {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  ValidationHelper(classifier).validate(testSet = dataset.test)
+  val accuracy: Double = ValidationHelper(classifier).validate(testSet = dataset.test)
+
+  println("Accuracy: %.2f%%".format(100.0 * accuracy))
 }
