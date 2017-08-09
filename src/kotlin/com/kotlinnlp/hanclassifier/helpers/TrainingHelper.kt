@@ -61,8 +61,6 @@ class TrainingHelper(
             validationSet: ArrayList<Example>? = null,
             modelFilename: String? = null) {
 
-    println("-- START TRAINING ON %d SENTENCES".format(trainingSet.size))
-
     (0 until epochs).forEach { i ->
 
       println("\nEpoch ${i + 1}")

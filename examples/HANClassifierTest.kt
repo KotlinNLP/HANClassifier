@@ -32,11 +32,11 @@ fun main(args: Array<String>) {
 
   val classifier = HANClassifier(outputSize = 5)
 
-  println("\n-- TRAINING ON ${dataset.training.size} EXAMPLES")
+  println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
+
   TrainingHelper(classifier).train(trainingSet = dataset.training, validationSet = dataset.validation, epochs = 10)
 
-  println("\n-- TEST ON ${dataset.test.size} EXAMPLES")
-  ValidationHelper(classifier).validate(testSet= dataset.test)
+  println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  println("End.")
+  ValidationHelper(classifier).validate(testSet = dataset.test)
 }
