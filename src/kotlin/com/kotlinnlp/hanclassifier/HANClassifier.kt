@@ -33,7 +33,7 @@ class HANClassifier(
   /**
    * The embeddings associated to each token.
    */
-  val embeddings = EmbeddingsContainer(count = 100000, size = embeddingsSize).randomize()
+  val embeddings = EmbeddingsContainer(count = 1e05.toInt(), size = embeddingsSize).randomize()
 
   /**
    * The [HAN] model of the encoder.
