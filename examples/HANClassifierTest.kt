@@ -10,6 +10,7 @@ import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.TrainingHelper
 import com.kotlinnlp.hanclassifier.helpers.ValidationHelper
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 
 /**
  * Train and validate a HAN classifier, using the datasets given as arguments.
@@ -34,7 +35,8 @@ fun main(args: Array<String>) {
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
-  TrainingHelper(classifier).train(trainingSet = dataset.training, validationSet = dataset.validation, epochs = 10)
+  TrainingHelper(classifier = classifier, updateMethod = ADAMMethod(stepSize = 0.0001))
+    .train(trainingSet = dataset.training, validationSet = dataset.validation, epochs = 10)
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
