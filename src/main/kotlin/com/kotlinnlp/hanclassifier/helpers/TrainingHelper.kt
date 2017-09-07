@@ -10,8 +10,10 @@ package com.kotlinnlp.hanclassifier.helpers
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.hanclassifier.utils.toHierarchyGroup
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
+import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.dataset.Shuffler
-import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HANOptimizer
+import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HANParameters
 import com.kotlinnlp.simplednn.helpers.training.utils.ExamplesIndices
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.simplednn.utils.progressindicator.ProgressIndicatorBar
@@ -22,11 +24,11 @@ import java.io.FileOutputStream
  * A helper for the training of a [HANClassifier].
  *
  * @property classifier the [HANClassifier] to train
- * @property optimizer the [HANOptimizer] of the [classifier] model
+ * @param updateMethod the [UpdateMethod] for the parameters of the [classifier]
  */
 class TrainingHelper(
-  val classifier: HANClassifier,
-  val optimizer: HANOptimizer = HANOptimizer(classifier.model)
+  private val classifier: HANClassifier,
+  updateMethod: UpdateMethod
 ) {
 
   /**
@@ -40,9 +42,16 @@ class TrainingHelper(
   private var bestAccuracy: Double = 0.0
 
   /**
-   *
+   * The helper for the valdiation of the [classifier].
    */
   private val validationHelper = ValidationHelper(this.classifier)
+
+  /**
+   * The optimizer of the parameters of the [classifier].
+   */
+  private val optimizer: ParamsOptimizer<HANParameters> = ParamsOptimizer(
+    params = this.classifier.model.params,
+    updateMethod = updateMethod)
 
   /**
    * Train the [classifier] using the given [trainingSet], validating each epoch if a [validationSet] is given.
