@@ -28,7 +28,7 @@ import java.io.FileOutputStream
  */
 class TrainingHelper(
   private val classifier: HANClassifier,
-  updateMethod: UpdateMethod
+  updateMethod: UpdateMethod<*>
 ) {
 
   /**
