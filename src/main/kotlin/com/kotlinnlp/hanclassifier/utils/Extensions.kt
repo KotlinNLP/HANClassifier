@@ -47,7 +47,7 @@ private fun getEmbeddingsArrayByForm(form: String, embeddings: EmbeddingsContain
   val index: Int = getIndexByForm(form)
 
   return if (index in 0 until embeddings.count)
-    embeddings.getEmbedding(index).array.values
+    embeddings.getEmbeddingByInt(index).array.values
   else
     embeddings.unknownEmbedding.array.values
 }
