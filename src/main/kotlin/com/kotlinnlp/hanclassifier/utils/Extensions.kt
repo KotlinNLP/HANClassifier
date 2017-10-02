@@ -31,7 +31,7 @@ fun List<List<String>>.toHierarchyGroup(embeddings: EmbeddingsContainer): Hierar
 /**
  *
  */
-private fun List<String>.toHierarchySequence(embeddings: EmbeddingsContainer): HierarchySequence {
+private fun List<String>.toHierarchySequence(embeddings: EmbeddingsContainer): HierarchySequence<DenseNDArray> {
 
   return HierarchySequence(*Array(
     size = this.size,

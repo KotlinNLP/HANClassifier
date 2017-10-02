@@ -12,6 +12,7 @@ import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.*
 import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainer
+import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import java.io.File
 import java.io.FileInputStream
 
@@ -41,6 +42,7 @@ class HANClassifier(
   val model: HAN = if (modelFilename != null) HAN.load(FileInputStream(File(modelFilename))) else HAN(
     hierarchySize = 2,
     inputSize = embeddingsSize,
+    inputType = LayerType.Input.Dense,
     biRNNsActivation = Tanh(),
     biRNNsConnectionType = recurrentConnectionType,
     attentionSize = embeddingsSize,
@@ -50,5 +52,5 @@ class HANClassifier(
   /**
    * The [HANEncoder] used as classifier (Softmax output activation).
    */
-  val encoder: HANEncoder = HANEncoder(model = this.model)
+  val encoder = HANEncoder<DenseNDArray>(model = this.model)
 }
