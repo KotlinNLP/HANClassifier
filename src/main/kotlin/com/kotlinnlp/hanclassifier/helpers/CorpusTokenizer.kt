@@ -87,7 +87,7 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
    */
   private fun InputStreamReader.getLinesCount(): Int {
 
-    var linesCount: Int = 0
+    var linesCount = 0
 
     this.forEachLine { linesCount++ }
 
