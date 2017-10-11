@@ -11,7 +11,7 @@ import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.hanclassifier.utils.toHierarchyGroup
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
-import com.kotlinnlp.simplednn.utils.progressindicator.ProgressIndicatorBar
+import com.kotlinnlp.progressindicator.ProgressIndicatorBar
 
 /**
  * A helper for the validation of a [HANClassifier].
@@ -32,7 +32,7 @@ class ValidationHelper(val classifier: HANClassifier) {
    */
   fun validate(testSet: ArrayList<Example>): Double {
 
-    var correctPredictions: Int = 0
+    var correctPredictions = 0
     val progress = ProgressIndicatorBar(testSet.size)
 
     this.startTiming()

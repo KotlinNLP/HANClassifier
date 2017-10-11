@@ -16,7 +16,7 @@ import com.kotlinnlp.simplednn.dataset.Shuffler
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HANParameters
 import com.kotlinnlp.simplednn.helpers.training.utils.ExamplesIndices
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
-import com.kotlinnlp.simplednn.utils.progressindicator.ProgressIndicatorBar
+import com.kotlinnlp.progressindicator.ProgressIndicatorBar
 import java.io.File
 import java.io.FileOutputStream
 
