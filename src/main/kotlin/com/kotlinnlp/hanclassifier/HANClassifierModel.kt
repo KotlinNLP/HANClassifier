@@ -15,6 +15,7 @@ import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainerByStri
 import com.kotlinnlp.simplednn.utils.Serializer
 import java.io.InputStream
 import java.io.OutputStream
+import java.io.Serializable
 
 /**
  * The [HANClassifier] model.
@@ -27,7 +28,7 @@ class HANClassifierModel(
   outputSize: Int,
   embeddingsSize: Int = 50,
   recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
-) {
+) : Serializable {
 
   companion object {
 
