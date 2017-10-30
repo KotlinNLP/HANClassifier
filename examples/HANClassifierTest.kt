@@ -17,18 +17,19 @@ import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMetho
  * Train and validate a HAN classifier, using the datasets given as arguments.
  *
  * Command line arguments:
- *   1. The filename of the training dataset
- *   2. The filename of the validation set
- *   3. The filename of the test set
+ *   1. The name of the file in which to save the model
+ *   2. The filename of the training dataset
+ *   3. The filename of the validation set
+ *   4. The filename of the test set
  */
 fun main(args: Array<String>) {
 
   println("Start 'HAN Classifier Test'")
 
   println("\n-- READING DATASET:")
-  println("\ttraining:   ${args[0]}")
-  println("\tvalidation: ${args[1]}")
-  println("\ttest:       ${args[2]}")
+  println("\ttraining:   ${args[1]}")
+  println("\tvalidation: ${args[2]}")
+  println("\ttest:       ${args[3]}")
 
   val dataset = Dataset(
     training = CorpusReader.read(args[0]),
@@ -40,7 +41,7 @@ fun main(args: Array<String>) {
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
   TrainingHelper(classifier = classifier, updateMethod = ADAMMethod(stepSize = 0.0001))
-    .train(trainingSet = dataset.training, validationSet = dataset.validation, epochs = 10)
+    .train(trainingSet = dataset.training, validationSet = dataset.validation, epochs = 10, modelFilename = args[0])
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
