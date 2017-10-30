@@ -33,9 +33,9 @@ fun main(args: Array<String>) {
   println("\ttest:       ${args[3]}")
 
   val dataset = Dataset(
-    training = CorpusReader.read(args[0]),
-    validation = CorpusReader.read(args[1]),
-    test = CorpusReader.read(args[2]))
+    training = CorpusReader.read(args[1]),
+    validation = CorpusReader.read(args[2]),
+    test = CorpusReader.read(args[3]))
 
   val classifier = HANClassifier(model = HANClassifierModel(outputSize = 5))
 
