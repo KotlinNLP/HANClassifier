@@ -15,8 +15,11 @@ import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMetho
 
 /**
  * Train and validate a HAN classifier, using the datasets given as arguments.
- * The first argument is the file name of the training dataset, the second one of the validation set and the third one
- * of the test set.
+ *
+ * Command line arguments:
+ *   1. The filename of the training dataset
+ *   2. The filename of the validation set
+ *   3. The filename of the test set
  */
 fun main(args: Array<String>) {
 
