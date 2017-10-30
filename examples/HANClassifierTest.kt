@@ -11,6 +11,7 @@ import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.TrainingHelper
 import com.kotlinnlp.hanclassifier.helpers.ValidationHelper
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 
 /**
@@ -40,8 +41,15 @@ fun main(args: Array<String>) {
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
-  TrainingHelper(classifier = classifier, updateMethod = ADAMMethod(stepSize = 0.0001))
-    .train(trainingSet = dataset.training, validationSet = dataset.validation, epochs = 10, modelFilename = args[0])
+  TrainingHelper(
+    classifier = classifier,
+    classifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
+    embeddingsUpdateMethod = AdaGradMethod(learningRate = 0.1)
+  ).train(
+    trainingSet = dataset.training,
+    validationSet = dataset.validation,
+    epochs = 10,
+    modelFilename = args[0])
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
