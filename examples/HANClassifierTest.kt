@@ -6,6 +6,7 @@
  * ------------------------------------------------------------------*/
 
 import com.kotlinnlp.hanclassifier.HANClassifier
+import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.TrainingHelper
@@ -31,7 +32,7 @@ fun main(args: Array<String>) {
     validation = CorpusReader.read(args[1]),
     test = CorpusReader.read(args[2]))
 
-  val classifier = HANClassifier(outputSize = 5)
+  val classifier = HANClassifier(model = HANClassifierModel(outputSize = 5))
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 

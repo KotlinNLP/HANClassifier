@@ -59,7 +59,7 @@ class ValidationHelper(val classifier: HANClassifier) {
   private fun validateExample(example: Example): Int {
 
     val output: DenseNDArray = this.classifier.encoder.forward(
-      sequencesHierarchy = example.inputText.toHierarchyGroup(this.classifier.embeddings))
+      sequencesHierarchy = example.inputText.toHierarchyGroup(this.classifier.model.embeddings))
 
     return if (this.predictionIsCorrect(output, example.outputGold)) 1 else 0
   }

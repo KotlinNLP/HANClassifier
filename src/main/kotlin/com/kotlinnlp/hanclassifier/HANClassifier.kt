@@ -7,50 +7,18 @@
 
 package com.kotlinnlp.hanclassifier
 
-import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
-import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
-import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.*
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainer
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
-import java.io.File
-import java.io.FileInputStream
 
 /**
  * A classifier based on Hierarchic Attention Networks.
  *
- * @param outputSize the size of the output
- * @param embeddingsSize the size of the embeddings (used also for the attention arrays, default = 50)
- * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
- * @param modelFilename the file name from which to load the model of the [HAN] (if null a new one is created)
+ * @param model the model of this [HANClassifier]
  */
-class HANClassifier(
-  outputSize: Int,
-  embeddingsSize: Int = 50,
-  recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU,
-  modelFilename: String? = null
-) {
-
-  /**
-   * The embeddings associated to each token.
-   */
-  val embeddings = EmbeddingsContainer(count = 1e05.toInt(), size = embeddingsSize).initialize()
-
-  /**
-   * The [HAN] model of the encoder.
-   */
-  val model: HAN = if (modelFilename != null) HAN.load(FileInputStream(File(modelFilename))) else HAN(
-    hierarchySize = 2,
-    inputSize = embeddingsSize,
-    inputType = LayerType.Input.Dense,
-    biRNNsActivation = Tanh(),
-    biRNNsConnectionType = recurrentConnectionType,
-    attentionSize = embeddingsSize,
-    outputSize = outputSize,
-    outputActivation = Softmax()).initialize()
+class HANClassifier(val model: HANClassifierModel) {
 
   /**
    * The [HANEncoder] used as classifier (Softmax output activation).
    */
-  val encoder = HANEncoder<DenseNDArray>(model = this.model)
+  val encoder = HANEncoder<DenseNDArray>(model = this.model.han)
 }

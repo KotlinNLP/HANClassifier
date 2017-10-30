@@ -50,7 +50,7 @@ class TrainingHelper(
    * The optimizer of the parameters of the [classifier].
    */
   private val optimizer: ParamsOptimizer<HANParameters> = ParamsOptimizer(
-    params = this.classifier.model.params,
+    params = this.classifier.model.han.params,
     updateMethod = updateMethod)
 
   /**
@@ -120,7 +120,7 @@ class TrainingHelper(
   private fun learnFromExample(example: Example) {
 
     val output: DenseNDArray = this.classifier.encoder.forward(
-      sequencesHierarchy = example.inputText.toHierarchyGroup(this.classifier.embeddings))
+      sequencesHierarchy = example.inputText.toHierarchyGroup(this.classifier.model.embeddings))
 
     val errors: DenseNDArray = output.copy()
     errors[example.outputGold] = errors[example.outputGold] - 1
