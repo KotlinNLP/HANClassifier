@@ -7,6 +7,7 @@
 
 package com.kotlinnlp.hanclassifier
 
+import com.kotlinnlp.hanclassifier.utils.toHierarchyGroup
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.*
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
@@ -21,4 +22,15 @@ class HANClassifier(val model: HANClassifierModel) {
    * The [HANEncoder] used as classifier (Softmax output activation).
    */
   val encoder = HANEncoder<DenseNDArray>(model = this.model.han)
+
+  /**
+   * Classify the given [text].
+   *
+   * @param text a tokenized text as list of sentences (lists of tokens)
+   *
+   * @return the probability distribution of the classification
+   */
+  fun classify(text: List<List<String>>): DenseNDArray {
+    return this.encoder.forward(text.toHierarchyGroup(this.model.embeddings))
+  }
 }
