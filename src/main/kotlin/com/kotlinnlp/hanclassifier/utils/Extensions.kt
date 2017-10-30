@@ -9,18 +9,13 @@ package com.kotlinnlp.hanclassifier.utils
 
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchyGroup
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchySequence
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainer
+import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainerByStrings
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
-
-/**
- * Map the forms of the tokens with an unique integer number.
- */
-private val formsMap = mutableMapOf<String, Int>()
 
 /**
  *
  */
-fun List<List<String>>.toHierarchyGroup(embeddings: EmbeddingsContainer): HierarchyGroup {
+fun List<List<String>>.toHierarchyGroup(embeddings: EmbeddingsContainerByStrings): HierarchyGroup {
 
   return HierarchyGroup(*Array(
     size = this.size,
@@ -31,35 +26,10 @@ fun List<List<String>>.toHierarchyGroup(embeddings: EmbeddingsContainer): Hierar
 /**
  *
  */
-private fun List<String>.toHierarchySequence(embeddings: EmbeddingsContainer): HierarchySequence<DenseNDArray> {
+private fun List<String>.toHierarchySequence(embeddings: EmbeddingsContainerByStrings): HierarchySequence<DenseNDArray> {
 
   return HierarchySequence(*Array(
     size = this.size,
-    init = { i -> getEmbeddingsArrayByForm(form = this[i], embeddings = embeddings) }
+    init = { i -> embeddings.getEmbedding(id = this[i]).array.values }
   ))
-}
-
-/**
- *
- */
-private fun getEmbeddingsArrayByForm(form: String, embeddings: EmbeddingsContainer): DenseNDArray {
-
-  val index: Int = getIndexByForm(form)
-
-  return if (index in 0 until embeddings.count)
-    embeddings.getEmbedding(index).array.values
-  else
-    embeddings.unknownEmbedding.array.values
-}
-
-/**
- *
- */
-private fun getIndexByForm(form: String): Int {
-
-  if (!formsMap.containsKey(form)) {
-    formsMap[form] = formsMap.size
-  }
-
-  return formsMap[form]!!
 }
