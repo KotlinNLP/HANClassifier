@@ -9,7 +9,6 @@ package com.kotlinnlp.hanclassifier.helpers
 
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.dataset.Example
-import com.kotlinnlp.hanclassifier.utils.toHierarchyGroup
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.dataset.Shuffler
@@ -17,6 +16,9 @@ import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HANParameters
 import com.kotlinnlp.simplednn.helpers.training.utils.ExamplesIndices
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.progressindicator.ProgressIndicatorBar
+import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchyGroup
+import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchySequence
+import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsOptimizer
 import java.io.File
 import java.io.FileOutputStream
 
@@ -24,11 +26,13 @@ import java.io.FileOutputStream
  * A helper for the training of a [HANClassifier].
  *
  * @property classifier the [HANClassifier] to train
- * @param updateMethod the [UpdateMethod] for the parameters of the [classifier]
+ * @param classifierUpdateMethod the [UpdateMethod] for the parameters of the [classifier]
+ * @param embeddingsUpdateMethod the [UpdateMethod] for the embeddings
  */
 class TrainingHelper(
   private val classifier: HANClassifier,
-  updateMethod: UpdateMethod<*>
+  classifierUpdateMethod: UpdateMethod<*>,
+  embeddingsUpdateMethod: UpdateMethod<*>
 ) {
 
   /**
@@ -49,9 +53,16 @@ class TrainingHelper(
   /**
    * The optimizer of the parameters of the [classifier].
    */
-  private val optimizer: ParamsOptimizer<HANParameters> = ParamsOptimizer(
+  private val classifierOptimizer: ParamsOptimizer<HANParameters> = ParamsOptimizer(
     params = this.classifier.model.han.params,
-    updateMethod = updateMethod)
+    updateMethod = classifierUpdateMethod)
+
+  /**
+   * The optimizer of the embeddings.
+   */
+  private val embeddingsOptimizer = EmbeddingsOptimizer(
+    embeddingsContainer = this.classifier.model.embeddings,
+    updateMethod = embeddingsUpdateMethod)
 
   /**
    * Train the [classifier] using the given [trainingSet], validating each epoch if a [validationSet] is given.
@@ -106,7 +117,7 @@ class TrainingHelper(
       this.learnFromExample(example = trainingSet[exampleIndex])
 
       if ((exampleIndex + 1) % batchSize == 0 || exampleIndex == trainingSet.lastIndex) {
-        this.optimizer.update()
+        this.update()
       }
     }
   }
@@ -119,15 +130,58 @@ class TrainingHelper(
    */
   private fun learnFromExample(example: Example) {
 
-    val output: DenseNDArray = this.classifier.encoder.forward(
-      sequencesHierarchy = example.inputText.toHierarchyGroup(this.classifier.model.embeddings))
+    val output: DenseNDArray = this.classifier.classify(example.inputText)
 
     val errors: DenseNDArray = output.copy()
     errors[example.outputGold] = errors[example.outputGold] - 1
 
-    this.classifier.encoder.backward(outputErrors = errors, propagateToInput = false)
+    this.classifier.encoder.backward(outputErrors = errors, propagateToInput = true)
 
-    this.optimizer.accumulate(this.classifier.encoder.getParamsErrors(copy = false))
+    this.classifierOptimizer.accumulate(this.classifier.encoder.getParamsErrors(copy = false))
+
+    this.accumulateEmbeddingsErrors(
+      inputText = example.inputText,
+      errorsHierarchy = this.classifier.encoder.getInputSequenceErrors(copy = false) as HierarchyGroup)
+  }
+
+  /**
+   * Accumulate the embeddings errors of a input text.
+   *
+   * @param inputText the input text
+   * @param errorsHierarchy the hierarchy group of errors of the given text
+   */
+  private fun accumulateEmbeddingsErrors(inputText: List<List<String>>, errorsHierarchy: HierarchyGroup) {
+
+    @Suppress("UNCHECKED_CAST")
+    inputText.zip(errorsHierarchy).forEach { (tokens, errorsItem) ->
+      this.accumulateSentenceEmbeddingsErrors(
+        tokens = tokens,
+        tokensErrors = errorsItem as HierarchySequence<DenseNDArray>)
+    }
+  }
+
+  /**
+   * Accumulate the embeddings errors of a sentence.
+   *
+   * @param tokens the list of tokens that compose the sentence
+   * @param tokensErrors the hierarchy sequence of errors of the given tokens
+   */
+  private fun accumulateSentenceEmbeddingsErrors(tokens: List<String>, tokensErrors: HierarchySequence<DenseNDArray>) {
+
+    tokens.zip(tokensErrors).forEach { (token, errors) ->
+      this.embeddingsOptimizer.accumulate(
+        embeddingId = this.classifier.model.embeddings.getIntId(token)!!,
+        errors = errors)
+    }
+  }
+
+  /**
+   * Optimizers update.
+   */
+  private fun update() {
+
+    this.classifierOptimizer.update()
+    this.embeddingsOptimizer.update()
   }
 
   /**
