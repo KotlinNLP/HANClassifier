@@ -9,7 +9,6 @@ package com.kotlinnlp.hanclassifier.helpers
 
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.dataset.Example
-import com.kotlinnlp.hanclassifier.utils.toHierarchyGroup
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.progressindicator.ProgressIndicatorBar
 
@@ -58,8 +57,7 @@ class ValidationHelper(val classifier: HANClassifier) {
    */
   private fun validateExample(example: Example): Int {
 
-    val output: DenseNDArray = this.classifier.encoder.forward(
-      sequencesHierarchy = example.inputText.toHierarchyGroup(this.classifier.model.embeddings))
+    val output: DenseNDArray = this.classifier.classify(example.inputText)
 
     return if (this.predictionIsCorrect(output, example.outputGold)) 1 else 0
   }
