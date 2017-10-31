@@ -9,13 +9,13 @@ package com.kotlinnlp.hanclassifier.utils
 
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchyGroup
 import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchySequence
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainerByStrings
+import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
 /**
  *
  */
-fun List<List<String>>.toHierarchyGroup(embeddings: EmbeddingsContainerByStrings): HierarchyGroup {
+fun List<List<String>>.toHierarchyGroup(embeddings: EmbeddingsMap<String>): HierarchyGroup {
 
   return HierarchyGroup(*Array(
     size = this.size,
@@ -26,10 +26,10 @@ fun List<List<String>>.toHierarchyGroup(embeddings: EmbeddingsContainerByStrings
 /**
  *
  */
-private fun List<String>.toHierarchySequence(embeddings: EmbeddingsContainerByStrings): HierarchySequence<DenseNDArray> {
+private fun List<String>.toHierarchySequence(embeddings: EmbeddingsMap<String>): HierarchySequence<DenseNDArray> {
 
   return HierarchySequence(*Array(
     size = this.size,
-    init = { i -> embeddings.getEmbedding(id = this[i]).array.values }
+    init = { i -> embeddings.get(key = this[i]).array.values }
   ))
 }
