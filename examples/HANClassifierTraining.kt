@@ -13,6 +13,7 @@ import com.kotlinnlp.hanclassifier.helpers.TrainingHelper
 import com.kotlinnlp.hanclassifier.helpers.ValidationHelper
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
+import com.kotlinnlp.simplednn.core.layers.LayerType
 
 /**
  * Train and validate a HAN classifier, using the datasets given as arguments.
@@ -36,13 +37,16 @@ fun main(args: Array<String>) {
     validation = CorpusReader.read(args[3]),
     test = CorpusReader.read(args[4]))
 
-  val classifier = HANClassifier(model = HANClassifierModel(outputSize = args[0].toInt()))
+  val classifier = HANClassifier(model = HANClassifierModel(
+    embeddingsSize = 100,
+    recurrentConnectionType = LayerType.Connection.RAN,
+    outputSize = args[0].toInt()))
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
   TrainingHelper(
     classifier = classifier,
-    classifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
+    classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
     embeddingsUpdateMethod = AdaGradMethod(learningRate = 0.1)
   ).train(
     trainingSet = dataset.training,
