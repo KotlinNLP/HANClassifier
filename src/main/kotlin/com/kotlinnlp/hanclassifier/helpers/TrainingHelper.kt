@@ -61,7 +61,7 @@ class TrainingHelper(
    * The optimizer of the embeddings.
    */
   private val embeddingsOptimizer = EmbeddingsOptimizer(
-    embeddingsContainer = this.classifier.model.embeddings,
+    embeddingsMap = this.classifier.model.embeddings,
     updateMethod = embeddingsUpdateMethod)
 
   /**
@@ -81,6 +81,8 @@ class TrainingHelper(
             validationSet: ArrayList<Example>? = null,
             modelFilename: String? = null) {
 
+    this.initEmbeddings(trainingSet)
+
     (0 until epochs).forEach { i ->
 
       println("\nEpoch ${i + 1}")
@@ -93,6 +95,25 @@ class TrainingHelper(
 
       if (validationSet != null) {
         this.validateAndSaveModel(validationSet = validationSet, modelFilename = modelFilename)
+      }
+    }
+  }
+
+  /**
+   * Initialize the Embeddings of the [classifier] model, associating them to the tokens contained in the given
+   * [trainingSet].
+   *
+   * @param trainingSet the dataset to train the [classifier]
+   */
+  private fun initEmbeddings(trainingSet: ArrayList<Example>) {
+
+    trainingSet.forEach { example ->
+      example.inputText.forEach { tokens ->
+        tokens.forEach { token ->
+          if (token !in this.classifier.model.embeddings) {
+            this.classifier.model.embeddings.set(key = token)
+          }
+        }
       }
     }
   }
@@ -169,9 +190,7 @@ class TrainingHelper(
   private fun accumulateSentenceEmbeddingsErrors(tokens: List<String>, tokensErrors: HierarchySequence<DenseNDArray>) {
 
     tokens.zip(tokensErrors).forEach { (token, errors) ->
-      this.embeddingsOptimizer.accumulate(
-        embeddingId = this.classifier.model.embeddings.getIntId(token)!!,
-        errors = errors)
+      this.embeddingsOptimizer.accumulate(embeddingKey = token, errors = errors)
     }
   }
 
