@@ -26,8 +26,6 @@ import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMetho
  */
 fun main(args: Array<String>) {
 
-  println("Start 'HAN Classifier Test'")
-
   println("\n-- READING DATASET:")
   println("\ttraining:   ${args[2]}")
   println("\tvalidation: ${args[3]}")
