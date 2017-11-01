@@ -130,14 +130,17 @@ class TrainingHelper(
                          shuffler: Shuffler?) {
 
     val progress = ProgressIndicatorBar(trainingSet.size)
+    var examplesCount = 0
 
     for (exampleIndex in ExamplesIndices(size = trainingSet.size, shuffler = shuffler)) {
+
+      examplesCount++
 
       progress.tick()
 
       this.learnFromExample(example = trainingSet[exampleIndex])
 
-      if ((exampleIndex + 1) % batchSize == 0 || exampleIndex == trainingSet.lastIndex) {
+      if (examplesCount % batchSize == 0 || examplesCount == trainingSet.size) {
         this.update()
       }
     }
