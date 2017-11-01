@@ -39,6 +39,7 @@ fun main(args: Array<String>) {
 
   val classifier = HANClassifier(model = HANClassifierModel(
     embeddingsSize = 100,
+    attentionSize = 30,
     recurrentConnectionType = LayerType.Connection.RAN,
     outputSize = args[0].toInt()))
 

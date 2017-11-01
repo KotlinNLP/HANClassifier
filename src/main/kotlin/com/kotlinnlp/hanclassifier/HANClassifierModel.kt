@@ -21,12 +21,14 @@ import java.io.Serializable
  * The [HANClassifier] model.
  *
  * @param outputSize the size of the output
- * @param embeddingsSize the size of the embeddings (used also for the attention arrays, default = 50)
+ * @param embeddingsSize the size of the embeddings (default = 50)
+ * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
 class HANClassifierModel(
   outputSize: Int,
   embeddingsSize: Int = 50,
+  attentionSize: Int = 20,
   recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
 ) : Serializable {
 
@@ -62,7 +64,7 @@ class HANClassifierModel(
     inputType = LayerType.Input.Dense,
     biRNNsActivation = Tanh(),
     biRNNsConnectionType = recurrentConnectionType,
-    attentionSize = embeddingsSize,
+    attentionSize = attentionSize,
     outputSize = outputSize,
     outputActivation = Softmax()).initialize()
 
