@@ -89,6 +89,7 @@ class TrainingHelper(
 
       this.startTiming()
 
+      this.newEpoch()
       this.trainEpoch(trainingSet = trainingSet, batchSize = batchSize, shuffler = shuffler)
 
       println("Elapsed time: %s".format(this.formatElapsedTime()))
@@ -135,9 +136,13 @@ class TrainingHelper(
     for (exampleIndex in ExamplesIndices(size = trainingSet.size, shuffler = shuffler)) {
 
       examplesCount++
-
       progress.tick()
 
+      if ((examplesCount - 1) % batchSize == 0) {
+        this.newBatch()
+      }
+
+      this.newExample()
       this.learnFromExample(example = trainingSet[exampleIndex])
 
       if (examplesCount % batchSize == 0 || examplesCount == trainingSet.size) {
@@ -198,10 +203,33 @@ class TrainingHelper(
   }
 
   /**
+   * Method to call every new epoch.
+   */
+  private fun newEpoch() {
+    this.classifierOptimizer.newEpoch()
+    this.embeddingsOptimizer.newEpoch()
+  }
+
+  /**
+   * Method to call every new batch.
+   */
+  private fun newBatch() {
+    this.classifierOptimizer.newBatch()
+    this.embeddingsOptimizer.newBatch()
+  }
+
+  /**
+   * Method to call every new example.
+   */
+  private fun newExample() {
+    this.classifierOptimizer.newExample()
+    this.embeddingsOptimizer.newExample()
+  }
+
+  /**
    * Optimizers update.
    */
   private fun update() {
-
     this.classifierOptimizer.update()
     this.embeddingsOptimizer.update()
   }
