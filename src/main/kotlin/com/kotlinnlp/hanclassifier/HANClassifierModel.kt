@@ -20,14 +20,14 @@ import java.io.Serializable
 /**
  * The [HANClassifier] model.
  *
+ * @property embeddings the map of tokens to embeddings
  * @param outputSize the size of the output
- * @param embeddingsSize the size of the embeddings (default = 50)
  * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
 class HANClassifierModel(
+  val embeddings: EmbeddingsMap<String>,
   outputSize: Int,
-  embeddingsSize: Int = 50,
   attentionSize: Int = 20,
   recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
 ) : Serializable {
@@ -51,16 +51,11 @@ class HANClassifierModel(
   }
 
   /**
-   * The map of tokens to embeddings.
-   */
-  val embeddings = EmbeddingsMap<String>(size = embeddingsSize)
-
-  /**
    * The [HAN] model of the encoder.
    */
   val han: HAN = HAN(
     hierarchySize = 2,
-    inputSize = embeddingsSize,
+    inputSize = this.embeddings.size,
     inputType = LayerType.Input.Dense,
     biRNNsActivation = Tanh(),
     biRNNsConnectionType = recurrentConnectionType,
