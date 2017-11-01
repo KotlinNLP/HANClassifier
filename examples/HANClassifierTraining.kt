@@ -14,6 +14,7 @@ import com.kotlinnlp.hanclassifier.helpers.ValidationHelper
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
+import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsMap
 
 /**
  * Train and validate a HAN classifier, using the datasets given as arguments.
@@ -24,8 +25,16 @@ import com.kotlinnlp.simplednn.core.layers.LayerType
  *   3. The filename of the training dataset
  *   4. The filename of the validation set
  *   5. The filename of the test set
+ *   6. The filename of the pre-trained embeddings file (optional)
  */
 fun main(args: Array<String>) {
+
+  val embeddings: EmbeddingsMap<String> = if (args.size > 5) {
+    println("\n-- LOADING EMBEDDINGS FROM '${args[5]}'...")
+    EmbeddingsMap.load(args[5])
+  } else {
+    EmbeddingsMap(size = 100)
+  }
 
   println("\n-- READING DATASET:")
   println("\ttraining:   ${args[2]}")
@@ -38,8 +47,8 @@ fun main(args: Array<String>) {
     test = CorpusReader.read(args[4]))
 
   val classifier = HANClassifier(model = HANClassifierModel(
-    embeddingsSize = 100,
-    attentionSize = 30,
+    embeddings = embeddings,
+    attentionSize = 100,
     recurrentConnectionType = LayerType.Connection.RAN,
     outputSize = args[0].toInt()))
 
@@ -47,7 +56,7 @@ fun main(args: Array<String>) {
 
   TrainingHelper(
     classifier = classifier,
-    classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
+    classifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
     embeddingsUpdateMethod = AdaGradMethod(learningRate = 0.1)
   ).train(
     trainingSet = dataset.training,
