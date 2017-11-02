@@ -56,7 +56,7 @@ fun main(args: Array<String>) {
 
   TrainingHelper(
     classifier = classifier,
-    classifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
+    classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
     embeddingsUpdateMethod = AdaGradMethod(learningRate = 0.1)
   ).train(
     trainingSet = dataset.training,
