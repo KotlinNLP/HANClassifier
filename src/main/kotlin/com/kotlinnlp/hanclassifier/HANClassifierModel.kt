@@ -61,7 +61,7 @@ class HANClassifierModel(
     biRNNsConnectionType = recurrentConnectionType,
     attentionSize = attentionSize,
     outputSize = outputSize,
-    outputActivation = Softmax()).initialize()
+    outputActivation = Softmax())
 
   /**
    * Serialize this [HANClassifierModel] and write it to an output stream.
