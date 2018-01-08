@@ -7,6 +7,15 @@ HANClassifier is part of [KotlinNLP](http://kotlinnlp.com/ "KotlinNLP").
 
 ## Getting Started
 
+### Import with Maven
+
+```xml
+<dependency>
+    <groupId>com.kotlinnlp</groupId>
+    <artifactId>hanclassifier</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
 
 ### Examples
 
@@ -14,7 +23,6 @@ Try some examples of usage of HANClassifier running the files in the `examples` 
 
 To run the examples you need datasets of test and training that you can find
 [here](https://www.dropbox.com/ "HANClassifier examples datasets")
-
 
 ### Model Serialization
 
