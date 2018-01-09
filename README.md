@@ -1,4 +1,4 @@
-# HANClassifier
+# HANClassifier [![GitHub version](https://badge.fury.io/gh/KotlinNLP%2FHANClassifier.svg)](https://badge.fury.io/gh/KotlinNLP%2FHANClassifier) [![Build Status](https://travis-ci.org/KotlinNLP/HANClassifier.svg?branch=master)](https://travis-ci.org/KotlinNLP/HANClassifier)
 
 HANClassifier is a very simple to use text classifier which uses the Hierarchical Attention Networks (HAN) from the [SimpleDNN](https://github.com/nlpstep/simplednn "SimpleDNN") library.
 
