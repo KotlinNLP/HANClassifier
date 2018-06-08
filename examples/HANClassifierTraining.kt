@@ -11,10 +11,10 @@ import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.TrainingHelper
 import com.kotlinnlp.hanclassifier.helpers.ValidationHelper
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsMap
 
 /**
  * Train and validate a HAN classifier, using the datasets given as arguments.

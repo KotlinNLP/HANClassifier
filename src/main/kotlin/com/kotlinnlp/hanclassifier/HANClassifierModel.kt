@@ -7,12 +7,12 @@
 
 package com.kotlinnlp.hanclassifier
 
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HAN
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsMap
-import com.kotlinnlp.simplednn.utils.Serializer
+import com.kotlinnlp.simplednn.deeplearning.attention.han.HAN
+import com.kotlinnlp.utils.Serializer
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.Serializable
@@ -53,7 +53,7 @@ class HANClassifierModel(
   /**
    * The [HAN] model of the encoder.
    */
-  val han: HAN = HAN(
+  val han = HAN(
     hierarchySize = 2,
     inputSize = this.embeddings.size,
     inputType = LayerType.Input.Dense,

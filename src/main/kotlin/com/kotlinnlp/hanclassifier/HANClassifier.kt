@@ -8,7 +8,7 @@
 package com.kotlinnlp.hanclassifier
 
 import com.kotlinnlp.hanclassifier.utils.toHierarchyGroup
-import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.*
+import com.kotlinnlp.simplednn.deeplearning.attention.han.HANEncoder
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
 /**

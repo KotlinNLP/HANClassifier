@@ -7,7 +7,7 @@
 
     <groupId>com.kotlinnlp</groupId>
     <artifactId>hanclassifier</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -62,9 +62,9 @@
         <spek.version>1.1.4</spek.version>
         <dokka.version>0.9.13</dokka.version>
         <klaxon.version>0.30</klaxon.version>
-        <progressindicator.version>1.0.0</progressindicator.version>
-        <simplednn.version>0.1.0</simplednn.version>
-        <neuraltokenizer.version>0.1.0</neuraltokenizer.version>
+        <simplednn.version>0.9.0</simplednn.version>
+        <neuraltokenizer.version>0.2.0</neuraltokenizer.version>
+        <utils.version>2.1.0</utils.version>
     </properties>
 
     <repositories>
@@ -135,6 +135,9 @@
                 <groupId>org.jetbrains.dokka</groupId>
                 <artifactId>dokka-maven-plugin</artifactId>
                 <version>${dokka.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -182,6 +185,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>${maven-gpg-plugin.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -249,12 +255,6 @@
 
         <dependency>
             <groupId>com.kotlinnlp</groupId>
-            <artifactId>progressindicator</artifactId>
-            <version>${progressindicator.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.kotlinnlp</groupId>
             <artifactId>simplednn</artifactId>
             <version>${simplednn.version}</version>
         </dependency>
@@ -263,6 +263,12 @@
             <groupId>com.kotlinnlp</groupId>
             <artifactId>neuraltokenizer</artifactId>
             <version>${neuraltokenizer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kotlinnlp</groupId>
+            <artifactId>utils</artifactId>
+            <version>${utils.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -7,9 +7,9 @@
 
 package com.kotlinnlp.hanclassifier.utils
 
-import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchyGroup
-import com.kotlinnlp.simplednn.deeplearning.attentionnetwork.han.HierarchySequence
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsMap
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
+import com.kotlinnlp.simplednn.deeplearning.attention.han.HierarchyGroup
+import com.kotlinnlp.simplednn.deeplearning.attention.han.HierarchySequence
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
 /**
