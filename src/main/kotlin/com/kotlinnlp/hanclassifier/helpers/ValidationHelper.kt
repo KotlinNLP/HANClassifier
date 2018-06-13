@@ -10,7 +10,7 @@ package com.kotlinnlp.hanclassifier.helpers
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
-import com.kotlinnlp.progressindicator.ProgressIndicatorBar
+import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 
 /**
  * A helper for the validation of a [HANClassifier].

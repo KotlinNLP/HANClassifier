@@ -13,7 +13,7 @@ import com.beust.klaxon.Parser
 import com.kotlinnlp.neuraltokenizer.NeuralTokenizer
 import com.kotlinnlp.neuraltokenizer.NeuralTokenizerModel
 import com.kotlinnlp.neuraltokenizer.Sentence
-import com.kotlinnlp.progressindicator.ProgressIndicatorBar
+import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import java.io.*
 
 /**
