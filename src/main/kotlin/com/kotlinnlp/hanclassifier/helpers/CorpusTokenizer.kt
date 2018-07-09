@@ -73,7 +73,7 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
 
     val parsedExample = this.jsonParser.parse(line.toInputStream()) as JsonArray<*>
 
-    val tokenizedText: ArrayList<Sentence> = this.tokenizer.tokenize(text = parsedExample[0] as String)
+    val tokenizedText: List<Sentence> = this.tokenizer.tokenize(text = parsedExample[0] as String)
     val outputClass: Int = parsedExample[1] as Int
 
     return JsonObject(mapOf(
@@ -102,12 +102,12 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
   /**
    * @return this list of sentences converted to a nested JsonArray of token forms
    */
-  private fun ArrayList<Sentence>.toJsonArray(): JsonArray<JsonArray<String>> {
+  private fun List<Sentence>.toJsonArray(): JsonArray<JsonArray<String>> {
 
     return JsonArray(*Array(
       size = this.size,
       init = { sentenceIndex ->
-        JsonArray(*this[sentenceIndex].tokens.filter{ !it.isSpace }.map{ it.form }.toTypedArray())
+        JsonArray(*this[sentenceIndex].tokens.map{ it.form }.toTypedArray())
       }
     ))
   }
