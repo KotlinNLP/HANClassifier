@@ -5,7 +5,7 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
-package com.kotlinnlp.hanclassifier.helpers
+package helpers
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
