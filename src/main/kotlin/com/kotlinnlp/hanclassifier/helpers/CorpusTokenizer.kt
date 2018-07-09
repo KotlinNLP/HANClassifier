@@ -71,7 +71,7 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
    */
   private fun convertLine(line: String): String {
 
-    val parsedExample = this.jsonParser.parse(line.toInputStream()) as JsonArray<*>
+    val parsedExample = this.jsonParser.parse(StringBuilder(line)) as JsonArray<*>
 
     val tokenizedText: List<Sentence> = this.tokenizer.tokenize(text = parsedExample[0] as String)
     val outputClass: Int = parsedExample[1] as Int
@@ -93,11 +93,6 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
 
     return linesCount
   }
-
-  /**
-   * @return this string converted to a byte array input stream
-   */
-  private fun String.toInputStream(): InputStream = ByteArrayInputStream(this.toByteArray())
 
   /**
    * @return this list of sentences converted to a nested JsonArray of token forms
