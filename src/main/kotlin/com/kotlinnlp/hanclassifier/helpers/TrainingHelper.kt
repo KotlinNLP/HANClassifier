@@ -164,13 +164,13 @@ class TrainingHelper(
     val errors: DenseNDArray = output.copy()
     errors[example.outputGold] = errors[example.outputGold] - 1
 
-    this.classifier.encoder.backward(outputErrors = errors, propagateToInput = true)
+    this.classifier.encoder.backward(outputErrors = errors)
 
     this.classifierOptimizer.accumulate(this.classifier.encoder.getParamsErrors(copy = false))
 
     this.accumulateEmbeddingsErrors(
       inputText = example.inputText,
-      errorsHierarchy = this.classifier.encoder.getInputSequenceErrors(copy = false) as HierarchyGroup)
+      errorsHierarchy = this.classifier.encoder.getInputErrors(copy = false) as HierarchyGroup)
   }
 
   /**

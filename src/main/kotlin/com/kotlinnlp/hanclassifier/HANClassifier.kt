@@ -21,7 +21,10 @@ class HANClassifier(val model: HANClassifierModel) {
   /**
    * The [HANEncoder] used as classifier (Softmax output activation).
    */
-  val encoder = HANEncoder<DenseNDArray>(model = this.model.han)
+  val encoder = HANEncoder<DenseNDArray>(
+    model = this.model.han,
+    useDropout = false, // TODO: enable during training
+    propagateToInput = true)
 
   /**
    * Classify the given [text].
