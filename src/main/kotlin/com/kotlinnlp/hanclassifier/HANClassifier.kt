@@ -39,8 +39,8 @@ class HANClassifier(
    */
   val encoder = HANEncoder<DenseNDArray>(
     model = this.model.han,
-    useDropout = false, // TODO: enable during training
-    propagateToInput = true)
+    useDropout = this.useDropout,
+    propagateToInput = this.propagateToInput)
 
   /**
    * Classify the given [input].
