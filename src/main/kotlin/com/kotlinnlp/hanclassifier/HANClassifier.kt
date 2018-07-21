@@ -8,15 +8,31 @@
 package com.kotlinnlp.hanclassifier
 
 import com.kotlinnlp.hanclassifier.utils.toHierarchyGroup
+import com.kotlinnlp.simplednn.core.neuralprocessor.NeuralProcessor
 import com.kotlinnlp.simplednn.deeplearning.attention.han.HANEncoder
+import com.kotlinnlp.simplednn.deeplearning.attention.han.HANParameters
+import com.kotlinnlp.simplednn.deeplearning.attention.han.HierarchyGroup
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
 /**
  * A classifier based on Hierarchic Attention Networks.
  *
  * @param model the model of this [HANClassifier]
+ * @param useDropout whether to apply the dropout during the forward
+ * @param propagateToInput whether to propagate the errors to the input during the backward
  */
-class HANClassifier(val model: HANClassifierModel) {
+class HANClassifier(
+  val model: HANClassifierModel,
+  override val useDropout: Boolean,
+  override val propagateToInput: Boolean,
+  override val id: Int = 0
+) : NeuralProcessor<
+  List<List<String>>, // InputType
+  DenseNDArray, // OutputType
+  DenseNDArray, // ErrorsType
+  HierarchyGroup, // InputErrorsType
+  HANParameters // ParamsType
+  > {
 
   /**
    * The [HANEncoder] used as classifier (Softmax output activation).
@@ -27,13 +43,40 @@ class HANClassifier(val model: HANClassifierModel) {
     propagateToInput = true)
 
   /**
-   * Classify the given [text].
+   * Classify the given [input].
    *
-   * @param text a tokenized text as list of sentences (lists of tokens)
+   * @param input a tokenized text as list of sentences (lists of tokens)
    *
    * @return the probability distribution of the classification
    */
-  fun classify(text: List<List<String>>): DenseNDArray {
-    return this.encoder.forward(text.toHierarchyGroup(this.model.embeddings))
+  override fun forward(input: List<List<String>>): DenseNDArray {
+    return this.encoder.forward(input.toHierarchyGroup(this.model.embeddings))
   }
+
+  /**
+   * The Backward.
+   *
+   * @param outputErrors the output errors
+   */
+  override fun backward(outputErrors: DenseNDArray) = this.encoder.backward(outputErrors)
+
+  /**
+   * Return the input errors of the last backward.
+   * Before calling this method make sure that [propagateToInput] is enabled.
+   *
+   * @param copy whether to return by value or by reference (default true)
+   *
+   * @return the input errors
+   */
+  override fun getInputErrors(copy: Boolean): HierarchyGroup =
+    this.encoder.getInputErrors(copy = false) as HierarchyGroup
+
+  /**
+   * Return the params errors of the last backward.
+   *
+   * @param copy a Boolean indicating whether the returned errors must be a copy or a reference (default true)
+   *
+   * @return the parameters errors
+   */
+  override fun getParamsErrors(copy: Boolean): HANParameters = this.encoder.getParamsErrors(copy)
 }

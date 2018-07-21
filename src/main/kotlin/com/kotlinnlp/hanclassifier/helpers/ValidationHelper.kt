@@ -8,14 +8,25 @@
 package com.kotlinnlp.hanclassifier.helpers
 
 import com.kotlinnlp.hanclassifier.HANClassifier
+import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 
 /**
  * A helper for the validation of a [HANClassifier].
+ *
+ * @param model the model
  */
-class ValidationHelper(val classifier: HANClassifier) {
+class ValidationHelper(model: HANClassifierModel) {
+
+  /**
+   * The classifier initialized with the model.
+   */
+  val classifier = HANClassifier(
+    model = model,
+    useDropout = true,
+    propagateToInput = true)
 
   /**
    * When timing started.
@@ -57,7 +68,7 @@ class ValidationHelper(val classifier: HANClassifier) {
    */
   private fun validateExample(example: Example): Int {
 
-    val output: DenseNDArray = this.classifier.classify(example.inputText)
+    val output: DenseNDArray = this.classifier.forward(example.inputText)
 
     return if (this.predictionIsCorrect(output, example.outputGold)) 1 else 0
   }

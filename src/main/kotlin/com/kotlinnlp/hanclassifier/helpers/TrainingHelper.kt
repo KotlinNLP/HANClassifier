@@ -48,7 +48,7 @@ class TrainingHelper(
   /**
    * The helper for the valdiation of the [classifier].
    */
-  private val validationHelper = ValidationHelper(this.classifier)
+  private val validationHelper = ValidationHelper(this.classifier.model)
 
   /**
    * The optimizer of the parameters of the [classifier].
@@ -159,18 +159,18 @@ class TrainingHelper(
    */
   private fun learnFromExample(example: Example) {
 
-    val output: DenseNDArray = this.classifier.classify(example.inputText)
+    val output: DenseNDArray = this.classifier.forward(example.inputText)
 
     val errors: DenseNDArray = output.copy()
     errors[example.outputGold] = errors[example.outputGold] - 1
 
-    this.classifier.encoder.backward(outputErrors = errors)
+    this.classifier.backward(errors)
 
-    this.classifierOptimizer.accumulate(this.classifier.encoder.getParamsErrors(copy = false))
+    this.classifierOptimizer.accumulate(this.classifier.getParamsErrors(copy = false))
 
     this.accumulateEmbeddingsErrors(
       inputText = example.inputText,
-      errorsHierarchy = this.classifier.encoder.getInputErrors(copy = false) as HierarchyGroup)
+      errorsHierarchy = this.classifier.getInputErrors(copy = false))
   }
 
   /**

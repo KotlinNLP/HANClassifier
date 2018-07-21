@@ -46,16 +46,19 @@ fun main(args: Array<String>) {
     validation = CorpusReader.read(args[3]),
     test = CorpusReader.read(args[4]))
 
-  val classifier = HANClassifier(model = HANClassifierModel(
+  val model = HANClassifierModel(
     embeddings = embeddings,
     attentionSize = 100,
     recurrentConnectionType = LayerType.Connection.RAN,
-    outputSize = args[0].toInt()))
+    outputSize = args[0].toInt())
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
   TrainingHelper(
-    classifier = classifier,
+    classifier = HANClassifier(
+      model = model,
+      useDropout = true,
+      propagateToInput = true),
     classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
     embeddingsUpdateMethod = AdaGradMethod(learningRate = 0.1)
   ).train(
@@ -66,7 +69,7 @@ fun main(args: Array<String>) {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val accuracy: Double = ValidationHelper(classifier).validate(testSet = dataset.test)
+  val accuracy: Double = ValidationHelper(model).validate(testSet = dataset.test)
 
   println("Accuracy: %.2f%%".format(100.0 * accuracy))
 }
