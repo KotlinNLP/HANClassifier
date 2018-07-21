@@ -37,7 +37,7 @@ class HANClassifier(
   /**
    * The [HANEncoder] used as classifier (Softmax output activation).
    */
-  val encoder = HANEncoder<DenseNDArray>(
+  private val encoder = HANEncoder<DenseNDArray>(
     model = this.model.han,
     useDropout = this.useDropout,
     propagateToInput = this.propagateToInput)
