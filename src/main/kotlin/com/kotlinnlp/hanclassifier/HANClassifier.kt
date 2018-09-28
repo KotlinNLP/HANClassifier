@@ -52,9 +52,8 @@ class HANClassifier(
    *
    * @return the probability distribution of the classification
    */
-  override fun forward(input: List<Sentence<FormToken>>): DenseNDArray {
-    return this.encoder.forward(input.toHierarchyGroup(this.model.embeddings))
-  }
+  override fun forward(input: List<Sentence<FormToken>>): DenseNDArray =
+    this.encoder.forward(input.toHierarchyGroup(this.model.embeddings))
 
   /**
    * The Backward.
