@@ -13,7 +13,7 @@ HANClassifier is part of [KotlinNLP](http://kotlinnlp.com/ "KotlinNLP").
 <dependency>
     <groupId>com.kotlinnlp</groupId>
     <artifactId>hanclassifier</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
