@@ -40,7 +40,7 @@ class ValidationHelper(model: HANClassifierModel) {
    *
    * @return the accuracy of the [classifier]
    */
-  fun validate(testSet: ArrayList<Example>): Double {
+  fun validate(testSet: List<Example>): Double {
 
     var correctPredictions = 0
     val progress = ProgressIndicatorBar(testSet.size)

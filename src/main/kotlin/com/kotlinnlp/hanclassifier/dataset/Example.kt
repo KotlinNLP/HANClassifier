@@ -7,10 +7,13 @@
 
 package com.kotlinnlp.hanclassifier.dataset
 
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
+
 /**
  * An example to train or test the HAN classifier.
  *
- * @property inputText the input text as list of sentences (list of tokens themselves)
+ * @property inputText the input text as list of sentences
  * @property outputGold the index of the gold class
  */
-data class Example(val inputText: List<List<String>>, val outputGold: Int)
+data class Example(val inputText: List<Sentence<FormToken>>, val outputGold: Int)

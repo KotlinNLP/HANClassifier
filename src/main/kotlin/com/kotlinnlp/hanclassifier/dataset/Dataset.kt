@@ -14,4 +14,4 @@ package com.kotlinnlp.hanclassifier.dataset
  * @property validation the validation set as list of examples
  * @property test the test set as list of examples
  */
-data class Dataset(val training: ArrayList<Example>, val validation: ArrayList<Example>, val test: ArrayList<Example>)
+data class Dataset(val training: List<Example>, val validation: List<Example>, val test: List<Example>)

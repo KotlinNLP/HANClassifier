@@ -9,6 +9,8 @@ package com.kotlinnlp.hanclassifier.helpers
 
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.dataset.Example
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.dataset.Shuffler
@@ -74,11 +76,11 @@ class TrainingHelper(
    * @param validationSet the dataset to validate the classifier after each epoch (default = null)
    * @param modelFilename the name of the file in which to save the best trained model (default = null)
    */
-  fun train(trainingSet: ArrayList<Example>,
+  fun train(trainingSet: List<Example>,
             epochs: Int,
             batchSize: Int = 1,
             shuffler: Shuffler? = Shuffler(enablePseudoRandom = true, seed = 743),
-            validationSet: ArrayList<Example>? = null,
+            validationSet: List<Example>? = null,
             modelFilename: String? = null) {
 
     this.initEmbeddings(trainingSet)
@@ -106,13 +108,13 @@ class TrainingHelper(
    *
    * @param trainingSet the dataset to train the [classifier]
    */
-  private fun initEmbeddings(trainingSet: ArrayList<Example>) {
+  private fun initEmbeddings(trainingSet: List<Example>) {
 
     trainingSet.forEach { example ->
-      example.inputText.forEach { tokens ->
-        tokens.forEach { token ->
-          if (token !in this.classifier.model.embeddings) {
-            this.classifier.model.embeddings.set(key = token)
+      example.inputText.forEach { sentence ->
+        sentence.tokens.forEach { token ->
+          if (token.form !in this.classifier.model.embeddings) {
+            this.classifier.model.embeddings.set(key = token.form)
           }
         }
       }
@@ -126,7 +128,7 @@ class TrainingHelper(
    * @param batchSize the size of each batch of examples
    * @param shuffler the [Shuffler] to shuffle examples before training (can be null)
    */
-  private fun trainEpoch(trainingSet: ArrayList<Example>,
+  private fun trainEpoch(trainingSet: List<Example>,
                          batchSize: Int,
                          shuffler: Shuffler?) {
 
@@ -179,12 +181,12 @@ class TrainingHelper(
    * @param inputText the input text
    * @param errorsHierarchy the hierarchy group of errors of the given text
    */
-  private fun accumulateEmbeddingsErrors(inputText: List<List<String>>, errorsHierarchy: HierarchyGroup) {
+  private fun accumulateEmbeddingsErrors(inputText: List<Sentence<FormToken>>, errorsHierarchy: HierarchyGroup) {
 
     @Suppress("UNCHECKED_CAST")
-    inputText.zip(errorsHierarchy).forEach { (tokens, errorsItem) ->
+    inputText.zip(errorsHierarchy).forEach { (sentence, errorsItem) ->
       this.accumulateSentenceEmbeddingsErrors(
-        tokens = tokens,
+        tokens = sentence.tokens,
         tokensErrors = errorsItem as HierarchySequence<DenseNDArray>)
     }
   }
@@ -192,13 +194,14 @@ class TrainingHelper(
   /**
    * Accumulate the embeddings errors of a sentence.
    *
-   * @param tokens the list of tokens that compose the sentence
+   * @param tokens the list of tokens that compose a sentence
    * @param tokensErrors the hierarchy sequence of errors of the given tokens
    */
-  private fun accumulateSentenceEmbeddingsErrors(tokens: List<String>, tokensErrors: HierarchySequence<DenseNDArray>) {
+  private fun accumulateSentenceEmbeddingsErrors(tokens: List<FormToken>,
+                                                 tokensErrors: HierarchySequence<DenseNDArray>) {
 
     tokens.zip(tokensErrors).forEach { (token, errors) ->
-      this.embeddingsOptimizer.accumulate(embeddingKey = token, errors = errors)
+      this.embeddingsOptimizer.accumulate(embeddingKey = token.form, errors = errors)
     }
   }
 
@@ -240,7 +243,7 @@ class TrainingHelper(
    * @param validationSet the validation dataset to validate the [classifier]
    * @param modelFilename the name of the file in which to save the best model of the [classifier] (default = null)
    */
-  private fun validateAndSaveModel(validationSet: ArrayList<Example>, modelFilename: String?) {
+  private fun validateAndSaveModel(validationSet: List<Example>, modelFilename: String?) {
 
     val accuracy = this.validateEpoch(validationSet)
 
@@ -263,7 +266,7 @@ class TrainingHelper(
    *
    * @return the current accuracy of the [classifier]
    */
-  private fun validateEpoch(validationSet: ArrayList<Example>): Double {
+  private fun validateEpoch(validationSet: List<Example>): Double {
 
     println("Epoch validation on %d sentences".format(validationSet.size))
 
