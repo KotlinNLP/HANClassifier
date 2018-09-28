@@ -61,6 +61,7 @@
         <spek.version>1.1.5</spek.version>
         <dokka.version>0.9.16</dokka.version>
         <klaxon.version>3.0.5</klaxon.version>
+        <linguisticdescription.version>0.10.0</linguisticdescription.version>
         <simplednn.version>0.11.0</simplednn.version>
         <utils.version>2.1.0</utils.version>
     </properties>
@@ -230,6 +231,12 @@
             <groupId>com.beust</groupId>
             <artifactId>klaxon</artifactId>
             <version>${klaxon.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kotlinnlp</groupId>
+            <artifactId>linguisticdescription</artifactId>
+            <version>${linguisticdescription.version}</version>
         </dependency>
 
         <dependency>
