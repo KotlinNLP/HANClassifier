@@ -123,7 +123,7 @@ class TrainingHelper(private val classifier: HANClassifier, updateMethod: Update
    */
   private fun learnFromExample(example: Example) {
 
-    val output: DenseNDArray = this.classifier.forward(example.inputText)
+    val output: DenseNDArray = this.classifier.forward(example.encodedSentences)
 
     val errors: DenseNDArray = output.copy()
     errors[example.outputGold] = errors[example.outputGold] - 1

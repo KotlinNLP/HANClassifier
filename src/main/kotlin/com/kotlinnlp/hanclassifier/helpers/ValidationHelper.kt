@@ -68,7 +68,7 @@ class ValidationHelper(model: HANClassifierModel) {
    */
   private fun validateExample(example: Example): Int {
 
-    val output: DenseNDArray = this.classifier.forward(example.inputText)
+    val output: DenseNDArray = this.classifier.forward(example.encodedSentences)
 
     return if (this.predictionIsCorrect(output, example.outputGold)) 1 else 0
   }
