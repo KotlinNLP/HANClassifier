@@ -11,10 +11,21 @@ import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.TrainingHelper
 import com.kotlinnlp.hanclassifier.helpers.ValidationHelper
-import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
-import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
+import com.kotlinnlp.lssencoder.LSSModel
+import com.kotlinnlp.morphologicalanalyzer.MorphologicalAnalyzer
+import com.kotlinnlp.morphologicalanalyzer.dictionary.MorphologyDictionary
+import com.kotlinnlp.neuralparser.helpers.preprocessors.MorphoPreprocessor
+import com.kotlinnlp.neuralparser.language.ParsingSentence
+import com.kotlinnlp.neuralparser.language.ParsingToken
+import com.kotlinnlp.neuralparser.parsers.lhrparser.LHRModel
+import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
+import com.kotlinnlp.tokensencoder.TokensEncoder
+import java.io.File
+import java.io.FileInputStream
 
 /**
  * Train and validate a HAN classifier, using the datasets given as arguments.
@@ -25,29 +36,43 @@ import com.kotlinnlp.simplednn.core.layers.LayerType
  *   3. The filename of the training dataset
  *   4. The filename of the validation set
  *   5. The filename of the test set
- *   6. The filename of the pre-trained embeddings file (optional)
+ *   6. The filename of the pre-trained embeddings
+ *   7. The filename of the LHRParser model
+ *   8. The filename of the morphology dictionary
  */
 fun main(args: Array<String>) {
 
-  val embeddings: EmbeddingsMap<String> = if (args.size > 5) {
-    println("\n-- LOADING EMBEDDINGS FROM '${args[5]}'...")
-    EmbeddingsMap.load(args[5])
-  } else {
-    EmbeddingsMap(size = 100)
+  val lssModel: LSSModel<ParsingToken, ParsingSentence> = args[6].let {
+    println("Loading the LSSEncoder model from the LHRParser model serialized in '$it'...")
+    LHRModel.load(FileInputStream(File(it))).lssModel
   }
+
+  val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>> = buildTokensEncoder(
+    embeddingsMap = args[5].let {
+      println("\n-- LOADING EMBEDDINGS FROM '$it'...")
+      EMBDLoader().load(it)
+    },
+    lssModel = lssModel,
+    preprocessor = args[7].let {
+      println("Loading serialized dictionary from '$it'...")
+      MorphoPreprocessor(MorphologicalAnalyzer(
+        language = lssModel.language,
+        dictionary = MorphologyDictionary.load(FileInputStream(File(it)))))
+    })
 
   println("\n-- READING DATASET:")
   println("\ttraining:   ${args[2]}")
   println("\tvalidation: ${args[3]}")
   println("\ttest:       ${args[4]}")
 
+  val corpusReader = CorpusReader(tokensEncoder)
   val dataset = Dataset(
-    training = CorpusReader.read(args[2]),
-    validation = CorpusReader.read(args[3]),
-    test = CorpusReader.read(args[4]))
+    training = corpusReader.read(args[2]),
+    validation = corpusReader.read(args[3]),
+    test = corpusReader.read(args[4]))
 
   val model = HANClassifierModel(
-    embeddings = embeddings,
+    tokensEncodingsSize = tokensEncoder.model.tokenEncodingSize,
     attentionSize = 100,
     recurrentConnectionType = LayerType.Connection.RAN,
     outputSize = args[0].toInt())
@@ -59,8 +84,7 @@ fun main(args: Array<String>) {
       model = model,
       useDropout = true,
       propagateToInput = true),
-    classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
-    embeddingsUpdateMethod = AdaGradMethod(learningRate = 0.1)
+    updateMethod = ADAMMethod(stepSize = 0.001)
   ).train(
     trainingSet = dataset.training,
     validationSet = dataset.validation,
