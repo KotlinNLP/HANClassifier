@@ -19,12 +19,14 @@ import java.io.Serializable
 /**
  * The [HANClassifier] model.
  *
+ * @param name the name of the model
  * @param tokensEncodingsSize the size of the tokens encodings
  * @param outputSize the size of the output
  * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
 class HANClassifierModel(
+  val name: String,
   tokensEncodingsSize: Int,
   outputSize: Int,
   attentionSize: Int = 20,
