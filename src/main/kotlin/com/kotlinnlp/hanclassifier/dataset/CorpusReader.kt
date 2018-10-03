@@ -11,6 +11,8 @@ import com.beust.klaxon.*
 import com.kotlinnlp.hanclassifier.EncodedSentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.tokensencoder.TokensEncoder
+import com.kotlinnlp.utils.getLinesCount
+import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import com.kotlinnlp.linguisticdescription.sentence.Sentence as SentenceInterface
 import java.io.File
 import java.lang.StringBuilder
@@ -19,8 +21,12 @@ import java.lang.StringBuilder
  * The corpus reader.
  *
  * @param tokensEncoder a tokens encoder
+ * @param verbose whether to print progress information (default = true)
  */
-class CorpusReader(private val tokensEncoder: TokensEncoder<FormToken, SentenceInterface<FormToken>>) {
+class CorpusReader(
+  private val tokensEncoder: TokensEncoder<FormToken, SentenceInterface<FormToken>>,
+  private val verbose: Boolean = true
+) {
 
   /**
    * A sentence token.
@@ -47,8 +53,11 @@ class CorpusReader(private val tokensEncoder: TokensEncoder<FormToken, SentenceI
 
     val examples = mutableListOf<Example>()
     val parser = Parser()
+    val progress = ProgressIndicatorBar(getLinesCount(filename))
 
     File(filename).reader().forEachLine { line ->
+
+      progress.tick()
 
       val parsedExample = parser.parse(StringBuilder(line)) as JsonObject
       val sentences = parsedExample.array<JsonArray<String>>("text")!!
