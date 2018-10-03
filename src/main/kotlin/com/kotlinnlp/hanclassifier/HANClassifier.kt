@@ -7,9 +7,6 @@
 
 package com.kotlinnlp.hanclassifier
 
-import com.kotlinnlp.linguisticdescription.sentence.Sentence
-import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
-import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.neuralprocessor.NeuralProcessor
 import com.kotlinnlp.simplednn.deeplearning.attention.han.HANEncoder
 import com.kotlinnlp.simplednn.deeplearning.attention.han.HANParameters
@@ -30,7 +27,7 @@ class HANClassifier(
   override val propagateToInput: Boolean,
   override val id: Int = 0
 ) : NeuralProcessor<
-  List<Sentence<FormToken>>, // InputType
+  List<EncodedSentence>, // InputType
   DenseNDArray, // OutputType
   DenseNDArray, // ErrorsType
   HierarchyGroup, // InputErrorsType
@@ -48,12 +45,11 @@ class HANClassifier(
   /**
    * Classify the given [input].
    *
-   * @param input a list of sentences of form tokens
+   * @param input a list of encoded sentences
    *
    * @return the probability distribution of the classification
    */
-  override fun forward(input: List<Sentence<FormToken>>): DenseNDArray =
-    this.encoder.forward(input.toHierarchyGroup(this.model.embeddings))
+  override fun forward(input: List<EncodedSentence>): DenseNDArray = this.encoder.forward(input.toHierarchyGroup())
 
   /**
    * The Backward.
@@ -83,21 +79,14 @@ class HANClassifier(
   override fun getParamsErrors(copy: Boolean): HANParameters = this.encoder.getParamsErrors(copy)
 
   /**
-   * @param embeddings an embeddings map of forms
-   *
    * @return the hierarchy group built from this list of sentences
    */
-  private fun List<Sentence<FormToken>>.toHierarchyGroup(embeddings: EmbeddingsMap<String>): HierarchyGroup =
-    HierarchyGroup(*this.map { it.toHierarchySequence(embeddings) }.toTypedArray())
+  private fun List<EncodedSentence>.toHierarchyGroup(): HierarchyGroup =
+    HierarchyGroup(*this.map { it.toHierarchySequence() }.toTypedArray())
 
   /**
-   * @param embeddings an embeddings map of forms
-   *
    * @return the hierarchy sequence built from sentence
    */
-  private fun Sentence<FormToken>.toHierarchySequence(
-    embeddings: EmbeddingsMap<String>
-  ): HierarchySequence<DenseNDArray> = HierarchySequence(
-    *this.tokens.map { embeddings.get(key = it.form).array.values }.toTypedArray()
-  )
+  private fun EncodedSentence.toHierarchySequence(): HierarchySequence<DenseNDArray> =
+    HierarchySequence(*this.tokens.map {it }.toTypedArray())
 }
