@@ -49,7 +49,7 @@ fun main(args: Array<String>) = mainBody {
     },
     lssModel = lssModel,
     preprocessor = parsedArgs.morphoDictionaryPath.let {
-      println("Loading serialized dictionary from '$it'...")
+      println("Loading morphology dictionary from '$it'...")
       MorphoPreprocessor(MorphologicalAnalyzer(
         language = lssModel.language,
         dictionary = MorphologyDictionary.load(FileInputStream(File(it)))))

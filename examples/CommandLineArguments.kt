@@ -97,7 +97,7 @@ internal class CommandLineArguments(args: Array<String>) {
    */
   val morphoDictionaryPath: String? by parser.storing(
     "-d",
-    "--dictionary",
+    "--morpho-dictionary",
     help="the file path of the serialized morphology dictionary"
   ).default { null }
 
