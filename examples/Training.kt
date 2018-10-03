@@ -28,32 +28,26 @@ import java.io.File
 import java.io.FileInputStream
 
 /**
- * Train and validate a HAN classifier, using the datasets given as arguments.
+ * Train and validate a [HANClassifierModel].
  *
- * Command line arguments:
- *   1. The number of classes
- *   2. The name of the file in which to save the model
- *   3. The filename of the training dataset
- *   4. The filename of the validation set
- *   5. The filename of the test set
- *   6. The filename of the pre-trained embeddings
- *   7. The filename of the LHRParser model
- *   8. The filename of the morphology dictionary
+ * Launch with the '-h' option for help about the command line arguments.
  */
 fun main(args: Array<String>) {
 
-  val lssModel: LSSModel<ParsingToken, ParsingSentence> = args[6].let {
+  val parsedArgs = CommandLineArguments(args)
+
+  val lssModel: LSSModel<ParsingToken, ParsingSentence> = parsedArgs.parserModelPath.let {
     println("Loading the LSSEncoder model from the LHRParser model serialized in '$it'...")
     LHRModel.load(FileInputStream(File(it))).lssModel
   }
 
   val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>> = buildTokensEncoder(
-    embeddingsMap = args[5].let {
+    embeddingsMap = parsedArgs.embeddingsPath.let {
       println("\n-- LOADING EMBEDDINGS FROM '$it'...")
       EMBDLoader().load(it)
     },
     lssModel = lssModel,
-    preprocessor = args[7].let {
+    preprocessor = parsedArgs.morphoDictionaryPath.let {
       println("Loading serialized dictionary from '$it'...")
       MorphoPreprocessor(MorphologicalAnalyzer(
         language = lssModel.language,
@@ -61,21 +55,22 @@ fun main(args: Array<String>) {
     })
 
   println("\n-- READING DATASET:")
-  println("\ttraining:   ${args[2]}")
-  println("\tvalidation: ${args[3]}")
-  println("\ttest:       ${args[4]}")
+  println("\ttraining:   ${parsedArgs.trainingSetPath}")
+  println("\tvalidation: ${parsedArgs.validationSetPath}")
+  println("\ttest:       ${parsedArgs.testSetPath}")
 
   val corpusReader = CorpusReader(tokensEncoder)
   val dataset = Dataset(
-    training = corpusReader.read(args[2]),
-    validation = corpusReader.read(args[3]),
-    test = corpusReader.read(args[4]))
+    training = corpusReader.read(parsedArgs.trainingSetPath),
+    validation = corpusReader.read(parsedArgs.validationSetPath),
+    test = corpusReader.read(parsedArgs.testSetPath))
 
   val model = HANClassifierModel(
+    name = parsedArgs.modelName,
     tokensEncodingsSize = tokensEncoder.model.tokenEncodingSize,
     attentionSize = 100,
     recurrentConnectionType = LayerType.Connection.RAN,
-    outputSize = args[0].toInt())
+    outputSize = parsedArgs.classesNumber)
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
@@ -89,7 +84,7 @@ fun main(args: Array<String>) {
     trainingSet = dataset.training,
     validationSet = dataset.validation,
     epochs = 10,
-    modelFilename = args[1])
+    modelFilename = parsedArgs.modelPath)
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
