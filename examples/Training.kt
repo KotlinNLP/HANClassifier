@@ -43,7 +43,7 @@ fun main(args: Array<String>) {
 
   val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>> = buildTokensEncoder(
     embeddingsMap = parsedArgs.embeddingsPath.let {
-      println("\n-- LOADING EMBEDDINGS FROM '$it'...")
+      println("Loading embeddings from '$it'...")
       EMBDLoader().load(it)
     },
     lssModel = lssModel,
@@ -54,16 +54,20 @@ fun main(args: Array<String>) {
         dictionary = MorphologyDictionary.load(FileInputStream(File(it)))))
     })
 
-  println("\n-- READING DATASET:")
-  println("\ttraining:   ${parsedArgs.trainingSetPath}")
-  println("\tvalidation: ${parsedArgs.validationSetPath}")
-  println("\ttest:       ${parsedArgs.testSetPath}")
-
   val corpusReader = CorpusReader(tokensEncoder)
   val dataset = Dataset(
-    training = corpusReader.read(parsedArgs.trainingSetPath),
-    validation = corpusReader.read(parsedArgs.validationSetPath),
-    test = corpusReader.read(parsedArgs.testSetPath))
+    training = parsedArgs.trainingSetPath.let {
+      println("Loading training dataset from $it")
+      corpusReader.read(it)
+    },
+    validation = parsedArgs.validationSetPath.let {
+      println("Loading validation dataset from $it")
+      corpusReader.read(it)
+    },
+    test = parsedArgs.testSetPath.let {
+      println("Loading test dataset from $it")
+      corpusReader.read(it)
+    })
 
   val model = HANClassifierModel(
     name = parsedArgs.modelName,
