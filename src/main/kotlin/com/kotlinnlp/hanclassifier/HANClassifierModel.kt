@@ -7,7 +7,6 @@
 
 package com.kotlinnlp.hanclassifier
 
-import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.layers.LayerType
@@ -20,13 +19,13 @@ import java.io.Serializable
 /**
  * The [HANClassifier] model.
  *
- * @property embeddings the map of tokens to embeddings
+ * @param tokensEncodingsSize the size of the tokens encodings
  * @param outputSize the size of the output
  * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
 class HANClassifierModel(
-  val embeddings: EmbeddingsMap<String>,
+  tokensEncodingsSize: Int,
   outputSize: Int,
   attentionSize: Int = 20,
   recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
@@ -55,7 +54,7 @@ class HANClassifierModel(
    */
   val han = HAN(
     hierarchySize = 2,
-    inputSize = this.embeddings.size,
+    inputSize = tokensEncodingsSize,
     inputType = LayerType.Input.Dense,
     biRNNsActivation = Tanh(),
     biRNNsConnectionType = recurrentConnectionType,
