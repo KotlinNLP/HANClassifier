@@ -8,15 +8,19 @@
 package com.kotlinnlp.hanclassifier.dataset
 
 import com.beust.klaxon.*
+import com.kotlinnlp.hanclassifier.EncodedSentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
+import com.kotlinnlp.tokensencoder.TokensEncoder
 import com.kotlinnlp.linguisticdescription.sentence.Sentence as SentenceInterface
 import java.io.File
 import java.lang.StringBuilder
 
 /**
  * The corpus reader.
+ *
+ * @param tokensEncoder a tokens encoder
  */
-object CorpusReader {
+class CorpusReader(private val tokensEncoder: TokensEncoder<FormToken, SentenceInterface<FormToken>>) {
 
   /**
    * A sentence token.
@@ -50,7 +54,10 @@ object CorpusReader {
       val sentences = parsedExample.array<JsonArray<String>>("text")!!
 
       examples.add(Example(
-        inputText = sentences.map { forms -> Sentence(tokens = forms.map { Token(form = it) }) },
+        encodedSentences = sentences.map { forms ->
+          val sentence = Sentence(tokens = forms.map { Token(form = it) })
+          EncodedSentence(tokens = this.tokensEncoder.forward(sentence))
+        },
         outputGold = parsedExample.int("class")!! - 1
       ))
     }
