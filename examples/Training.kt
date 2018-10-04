@@ -13,20 +13,14 @@ import com.kotlinnlp.hanclassifier.helpers.Trainer
 import com.kotlinnlp.hanclassifier.helpers.Validator
 import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
-import com.kotlinnlp.lssencoder.LSSModel
-import com.kotlinnlp.morphologicalanalyzer.MorphologicalAnalyzer
-import com.kotlinnlp.morphologicalanalyzer.dictionary.MorphologyDictionary
-import com.kotlinnlp.neuralparser.helpers.preprocessors.MorphoPreprocessor
-import com.kotlinnlp.neuralparser.language.ParsingSentence
-import com.kotlinnlp.neuralparser.language.ParsingToken
-import com.kotlinnlp.neuralparser.parsers.lhrparser.LHRModel
+import com.kotlinnlp.tokensencoder.embeddings.keyextractor.NormWordKeyExtractor
 import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.tokensencoder.TokensEncoder
+import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoder
+import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
 import com.xenomachina.argparser.mainBody
-import java.io.File
-import java.io.FileInputStream
 
 /**
  * Train and validate a [HANClassifierModel].
@@ -37,25 +31,16 @@ fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
 
-  val lssModel: LSSModel<ParsingToken, ParsingSentence> = parsedArgs.parserModelPath.let {
-    println("Loading the LSSEncoder model from the LHRParser model serialized in '$it'...")
-    LHRModel.load(FileInputStream(File(it))).lssModel
-  }
+  val tokensEncoder = EmbeddingsEncoder<FormToken, Sentence<FormToken>>(
+    model = EmbeddingsEncoderModel(
+      embeddingsMap = parsedArgs.embeddingsPath.let {
+        println("Loading embeddings from '$it'...")
+        EMBDLoader().load(it)
+      },
+      embeddingKeyExtractor = NormWordKeyExtractor()),
+    useDropout = true)
 
-  val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>> = buildTokensEncoder(
-    embeddingsMap = parsedArgs.embeddingsPath.let {
-      println("Loading embeddings from '$it'...")
-      EMBDLoader().load(it)
-    },
-    lssModel = lssModel,
-    preprocessor = parsedArgs.morphoDictionaryPath.let {
-      println("Loading morphology dictionary from '$it'...")
-      MorphoPreprocessor(MorphologicalAnalyzer(
-        language = lssModel.language,
-        dictionary = MorphologyDictionary.load(FileInputStream(File(it)))))
-    })
-
-  val corpusReader = CorpusReader(tokensEncoder)
+  val corpusReader = CorpusReader()
   val dataset = Dataset(
     training = parsedArgs.trainingSetPath.let {
       println("Loading training dataset from $it")
@@ -69,6 +54,10 @@ fun main(args: Array<String>) = mainBody {
       println("Loading test dataset from $it")
       corpusReader.read(it)
     })
+
+  dataset.training.forEach { example ->
+    example.sentences.forEach { s -> s.tokens.forEach { tokensEncoder.model.embeddingsMap.dictionary.add(it.form) } }
+  }
 
   val model = HANClassifierModel(
     name = parsedArgs.modelName,
@@ -84,7 +73,9 @@ fun main(args: Array<String>) = mainBody {
       model = model,
       useDropout = true,
       propagateToInput = true),
-    updateMethod = ADAMMethod(stepSize = 0.001)
+    updateMethod = ADAMMethod(stepSize = 0.001),
+    tokensEncoder = tokensEncoder,
+    tokensEncoderOptimizer = tokensEncoder.model.buildOptimizer(updateMethod = AdaGradMethod(learningRate = 0.1))
   ).train(
     trainingSet = dataset.training,
     validationSet = dataset.validation,
@@ -93,7 +84,7 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val accuracy: Double = Validator(model).validate(testSet = dataset.test)
+  val accuracy: Double = Validator(model = model, tokensEncoder = tokensEncoder).validate(testSet = dataset.test)
 
   println("Accuracy: %.2f%%".format(100.0 * accuracy))
 }
