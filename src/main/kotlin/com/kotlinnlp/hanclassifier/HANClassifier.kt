@@ -18,13 +18,13 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
  * A classifier based on Hierarchic Attention Networks.
  *
  * @param model the model of this [HANClassifier]
- * @param useDropout whether to apply the dropout during the forward
- * @param propagateToInput whether to propagate the errors to the input during the backward
+ * @param useDropout whether to apply the dropout during the forward (default = false)
+ * @param propagateToInput whether to propagate the errors to the input during the backward (default = false)
  */
 class HANClassifier(
   val model: HANClassifierModel,
-  override val useDropout: Boolean,
-  override val propagateToInput: Boolean,
+  override val useDropout: Boolean = false,
+  override val propagateToInput: Boolean = false,
   override val id: Int = 0
 ) : NeuralProcessor<
   List<EncodedSentence>, // InputType
