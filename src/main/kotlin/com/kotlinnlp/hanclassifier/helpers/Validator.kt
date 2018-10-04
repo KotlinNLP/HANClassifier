@@ -7,18 +7,26 @@
 
 package com.kotlinnlp.hanclassifier.helpers
 
+import com.kotlinnlp.hanclassifier.EncodedSentence
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.Example
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
+import com.kotlinnlp.tokensencoder.TokensEncoder
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 
 /**
  * A helper for the validation of a [HANClassifier].
  *
  * @param model the model
+ * @param tokensEncoder the tokens encoder used to encode the input
  */
-class Validator(model: HANClassifierModel) {
+class Validator(
+  model: HANClassifierModel,
+  private val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>
+) {
 
   /**
    * The classifier initialized with the model.
@@ -68,7 +76,8 @@ class Validator(model: HANClassifierModel) {
    */
   private fun validateExample(example: Example): Int {
 
-    val output: DenseNDArray = this.classifier.forward(example.encodedSentences)
+    val output: DenseNDArray = this.classifier.forward(
+      input = example.sentences.map { EncodedSentence(this.tokensEncoder.forward(it)) })
 
     return if (this.predictionIsCorrect(output, example.outputGold)) 1 else 0
   }

@@ -8,9 +8,7 @@
 package com.kotlinnlp.hanclassifier.dataset
 
 import com.beust.klaxon.*
-import com.kotlinnlp.hanclassifier.EncodedSentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
-import com.kotlinnlp.tokensencoder.TokensEncoder
 import com.kotlinnlp.utils.getLinesCount
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import com.kotlinnlp.linguisticdescription.sentence.Sentence as SentenceInterface
@@ -20,13 +18,9 @@ import java.lang.StringBuilder
 /**
  * The corpus reader.
  *
- * @param tokensEncoder a tokens encoder
  * @param verbose whether to print progress information (default = true)
  */
-class CorpusReader(
-  private val tokensEncoder: TokensEncoder<FormToken, SentenceInterface<FormToken>>,
-  private val verbose: Boolean = true
-) {
+class CorpusReader(private val verbose: Boolean = true) {
 
   /**
    * A sentence token.
@@ -63,10 +57,7 @@ class CorpusReader(
       val sentences = parsedExample.array<JsonArray<String>>("text")!!
 
       examples.add(Example(
-        encodedSentences = sentences.map { forms ->
-          val sentence = Sentence(tokens = forms.map { Token(form = it) })
-          EncodedSentence(tokens = this.tokensEncoder.forward(sentence))
-        },
+        sentences = sentences.map { forms -> Sentence(tokens = forms.map { Token(form = it) }) },
         outputGold = parsedExample.int("class")!! - 1
       ))
     }

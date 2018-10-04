@@ -7,14 +7,19 @@
 
 package com.kotlinnlp.hanclassifier.helpers
 
+import com.kotlinnlp.hanclassifier.EncodedSentence
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.dataset.Example
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.dataset.Shuffler
 import com.kotlinnlp.simplednn.helpers.training.utils.ExamplesIndices
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.simplednn.deeplearning.attention.han.HANParameters
+import com.kotlinnlp.tokensencoder.TokensEncoder
+import com.kotlinnlp.tokensencoder.TokensEncoderOptimizer
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import java.io.File
 import java.io.FileOutputStream
@@ -24,8 +29,15 @@ import java.io.FileOutputStream
  *
  * @property classifier the [HANClassifier] to train
  * @param updateMethod the [UpdateMethod] for the parameters of the [classifier]
+ * @param tokensEncoder the tokens encoder used to encode the input
+ * @param tokensEncoderOptimizer the optimizer of the tokens encoder (null if the tokens encoder must not be trained)
  */
-class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<*>) {
+class Trainer(
+  private val classifier: HANClassifier,
+  updateMethod: UpdateMethod<*>,
+  private val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>,
+  private val tokensEncoderOptimizer: TokensEncoderOptimizer? = null
+) {
 
   /**
    * When timing started.
@@ -40,7 +52,7 @@ class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<
   /**
    * The helper for the valdiation of the [classifier].
    */
-  private val validationHelper = Validator(this.classifier.model)
+  private val validationHelper = Validator(model = this.classifier.model, tokensEncoder = this.tokensEncoder)
 
   /**
    * The optimizer of the parameters of the [classifier].
@@ -123,13 +135,21 @@ class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<
    */
   private fun learnFromExample(example: Example) {
 
-    val output: DenseNDArray = this.classifier.forward(example.encodedSentences)
+    val output: DenseNDArray = this.classifier.forward(
+      input = example.sentences.map { EncodedSentence(this.tokensEncoder.forward(it)) })
 
     val errors: DenseNDArray = output.copy()
     errors[example.outputGold] = errors[example.outputGold] - 1
 
     this.classifier.backward(errors)
     this.classifierOptimizer.accumulate(this.classifier.getParamsErrors(copy = false))
+
+    this.tokensEncoderOptimizer?.let { optimizer ->
+      this.classifier.getInputErrors(copy = false).forEach {
+        this.tokensEncoder.backward(it.tokens)
+        optimizer.accumulate(this.tokensEncoder.getParamsErrors())
+      }
+    }
   }
 
   /**
@@ -137,6 +157,7 @@ class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<
    */
   private fun newEpoch() {
     this.classifierOptimizer.newEpoch()
+    this.tokensEncoderOptimizer?.newEpoch()
   }
 
   /**
@@ -144,6 +165,7 @@ class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<
    */
   private fun newBatch() {
     this.classifierOptimizer.newBatch()
+    this.tokensEncoderOptimizer?.newBatch()
   }
 
   /**
@@ -151,6 +173,7 @@ class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<
    */
   private fun newExample() {
     this.classifierOptimizer.newExample()
+    this.tokensEncoderOptimizer?.newExample()
   }
 
   /**
@@ -158,6 +181,7 @@ class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<
    */
   private fun update() {
     this.classifierOptimizer.update()
+    this.tokensEncoderOptimizer?.update()
   }
 
   /**
