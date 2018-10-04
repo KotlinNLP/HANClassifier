@@ -18,7 +18,7 @@ import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
  *
  * @param model the model
  */
-class ValidationHelper(model: HANClassifierModel) {
+class Validator(model: HANClassifierModel) {
 
   /**
    * The classifier initialized with the model.

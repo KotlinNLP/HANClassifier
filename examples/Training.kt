@@ -9,8 +9,8 @@ import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
-import com.kotlinnlp.hanclassifier.helpers.TrainingHelper
-import com.kotlinnlp.hanclassifier.helpers.ValidationHelper
+import com.kotlinnlp.hanclassifier.helpers.Trainer
+import com.kotlinnlp.hanclassifier.helpers.Validator
 import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.lssencoder.LSSModel
@@ -79,7 +79,7 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
-  TrainingHelper(
+  Trainer(
     classifier = HANClassifier(
       model = model,
       useDropout = true,
@@ -93,7 +93,7 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val accuracy: Double = ValidationHelper(model).validate(testSet = dataset.test)
+  val accuracy: Double = Validator(model).validate(testSet = dataset.test)
 
   println("Accuracy: %.2f%%".format(100.0 * accuracy))
 }

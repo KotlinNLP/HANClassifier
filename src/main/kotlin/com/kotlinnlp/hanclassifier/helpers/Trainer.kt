@@ -25,7 +25,7 @@ import java.io.FileOutputStream
  * @property classifier the [HANClassifier] to train
  * @param updateMethod the [UpdateMethod] for the parameters of the [classifier]
  */
-class TrainingHelper(private val classifier: HANClassifier, updateMethod: UpdateMethod<*>) {
+class Trainer(private val classifier: HANClassifier, updateMethod: UpdateMethod<*>) {
 
   /**
    * When timing started.
@@ -40,7 +40,7 @@ class TrainingHelper(private val classifier: HANClassifier, updateMethod: Update
   /**
    * The helper for the valdiation of the [classifier].
    */
-  private val validationHelper = ValidationHelper(this.classifier.model)
+  private val validationHelper = Validator(this.classifier.model)
 
   /**
    * The optimizer of the parameters of the [classifier].
