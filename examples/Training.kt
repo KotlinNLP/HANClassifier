@@ -15,6 +15,7 @@ import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.tokensencoder.embeddings.keyextractor.NormWordKeyExtractor
 import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMapByDictionary
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
@@ -31,27 +32,29 @@ fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
 
+  val embeddingsMap: EmbeddingsMapByDictionary = parsedArgs.embeddingsPath.let {
+    println("Loading embeddings from '$it'...")
+    EMBDLoader().load(it)
+  }
+
   val tokensEncoder = EmbeddingsEncoder<FormToken, Sentence<FormToken>>(
     model = EmbeddingsEncoderModel(
-      embeddingsMap = parsedArgs.embeddingsPath.let {
-        println("Loading embeddings from '$it'...")
-        EMBDLoader().load(it)
-      },
+      embeddingsMap = embeddingsMap,
       embeddingKeyExtractor = NormWordKeyExtractor()),
     useDropout = true)
 
   val corpusReader = CorpusReader()
   val dataset = Dataset(
     training = parsedArgs.trainingSetPath.let {
-      println("Loading training dataset from $it")
+      println("Loading training dataset from '$it'...")
       corpusReader.read(it)
     },
     validation = parsedArgs.validationSetPath.let {
-      println("Loading validation dataset from $it")
+      println("Loading validation dataset from '$it'...")
       corpusReader.read(it)
     },
     test = parsedArgs.testSetPath.let {
-      println("Loading test dataset from $it")
+      println("Loading test dataset from '$it'...")
       corpusReader.read(it)
     })
 
@@ -81,6 +84,11 @@ fun main(args: Array<String>) = mainBody {
     validationSet = dataset.validation,
     epochs = 10,
     modelFilename = parsedArgs.modelPath)
+
+  parsedArgs.trainedEmbeddingsPath.let {
+    embeddingsMap.dump(it, digits = 6)
+    println("\nSaving re-trained embeddings to '$it'...")
+  }
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
