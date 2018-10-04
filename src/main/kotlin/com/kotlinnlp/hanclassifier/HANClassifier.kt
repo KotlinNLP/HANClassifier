@@ -30,7 +30,7 @@ class HANClassifier(
   List<EncodedSentence>, // InputType
   DenseNDArray, // OutputType
   DenseNDArray, // ErrorsType
-  HierarchyGroup, // InputErrorsType
+  List<EncodedSentence>, // InputErrorsType
   HANParameters // ParamsType
   > {
 
@@ -66,8 +66,10 @@ class HANClassifier(
    *
    * @return the input errors
    */
-  override fun getInputErrors(copy: Boolean): HierarchyGroup =
-    this.encoder.getInputErrors(copy = false) as HierarchyGroup
+  override fun getInputErrors(copy: Boolean): List<EncodedSentence> =
+    (this.encoder.getInputErrors(copy = false) as HierarchyGroup).map { group ->
+      EncodedSentence(tokens = (group as HierarchySequence<*>).map { it as DenseNDArray })
+    }
 
   /**
    * Return the params errors of the last backward.
