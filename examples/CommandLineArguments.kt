@@ -83,6 +83,15 @@ internal class CommandLineArguments(args: Array<String>) {
   )
 
   /**
+   * The file path in which to save the re-trained word embeddings.
+   */
+  val trainedEmbeddingsPath: String by parser.storing(
+    "-r",
+    "--re-trained-word-emb-path",
+    help="the file path in which to save the re-trained word embeddings"
+  )
+
+  /**
    * Force parsing all arguments (only read ones are parsed by default).
    */
   init {
