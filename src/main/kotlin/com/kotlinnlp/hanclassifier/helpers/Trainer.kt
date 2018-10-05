@@ -28,12 +28,13 @@ import java.io.FileOutputStream
  * A helper for the training of a [HANClassifier].
  *
  * @property classifier the [HANClassifier] to train
- * @param updateMethod the [UpdateMethod] for the parameters of the [classifier]
- * @param tokensEncoder the tokens encoder used to encode the input
+ * @param tokensEncoder the tokens encoder to encode the input
  * @param tokensEncoderOptimizer the optimizer of the tokens encoder (null if the tokens encoder must not be trained)
  */
 class Trainer(
   private val classifier: HANClassifier,
+  tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>,
+  private val tokensEncoderOptimizer: TokensEncoderOptimizer? = null,
   updateMethod: UpdateMethod<*>,
   private val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>,
   private val tokensEncoderOptimizer: TokensEncoderOptimizer? = null
@@ -50,9 +51,16 @@ class Trainer(
   private var bestAccuracy: Double = 0.0
 
   /**
-   * The helper for the valdiation of the [classifier].
+   * The helper for the validation of the [classifier].
    */
-  private val validationHelper = Validator(model = this.classifier.model, tokensEncoder = this.tokensEncoder)
+  private val validationHelper = Validator(model = this.classifier.model, tokensEncoderModel = tokensEncoder.model)
+
+  /**
+   * A pool of tokens encoders to encode the input.
+   */
+  private val tokensEncodersPool = TokensEncodersPool(
+    model = tokensEncoder.model,
+    useDropout = tokensEncoder.useDropout)
 
   /**
    * The optimizer of the parameters of the [classifier].
@@ -135,8 +143,10 @@ class Trainer(
    */
   private fun learnFromExample(example: Example) {
 
+    val encoders: List<TokensEncoder<FormToken, Sentence<FormToken>>> =
+      example.sentences.map { this.tokensEncodersPool.getItem() }
     val output: DenseNDArray = this.classifier.forward(
-      input = example.sentences.map { EncodedSentence(this.tokensEncoder.forward(it)) })
+      input = example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) })
 
     val errors: DenseNDArray = output.copy()
     errors[example.outputGold] = errors[example.outputGold] - 1
@@ -145,9 +155,9 @@ class Trainer(
     this.classifierOptimizer.accumulate(this.classifier.getParamsErrors(copy = false))
 
     this.tokensEncoderOptimizer?.let { optimizer ->
-      this.classifier.getInputErrors(copy = false).forEach {
-        this.tokensEncoder.backward(it.tokens)
-        optimizer.accumulate(this.tokensEncoder.getParamsErrors())
+      this.classifier.getInputErrors(copy = false).zip(encoders) { errors, encoder ->
+        encoder.backward(errors.tokens)
+        optimizer.accumulate(encoder.getParamsErrors())
       }
     }
   }

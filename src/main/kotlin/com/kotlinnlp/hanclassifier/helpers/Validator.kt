@@ -15,26 +15,32 @@ import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.tokensencoder.TokensEncoder
+import com.kotlinnlp.tokensencoder.TokensEncoderModel
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 
 /**
  * A helper for the validation of a [HANClassifier].
  *
- * @param model the model
- * @param tokensEncoder the tokens encoder used to encode the input
+ * @param model the [HANClassifier] model to validate
+ * @param tokensEncoderModel the model of a tokens encoder to encode the input
  */
 class Validator(
   model: HANClassifierModel,
-  private val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>
+  tokensEncoderModel: TokensEncoderModel<FormToken, Sentence<FormToken>>
 ) {
+
+  /**
+   * A pool of tokens encoders to encode the input.
+   */
+  private val tokensEncodersPool = TokensEncodersPool(model = tokensEncoderModel, useDropout = false)
 
   /**
    * The classifier initialized with the model.
    */
-  val classifier = HANClassifier(
+  private val classifier = HANClassifier(
     model = model,
-    useDropout = true,
-    propagateToInput = true)
+    useDropout = false,
+    propagateToInput = false)
 
   /**
    * When timing started.
@@ -76,8 +82,10 @@ class Validator(
    */
   private fun validateExample(example: Example): Int {
 
+    val encoders: List<TokensEncoder<FormToken, Sentence<FormToken>>> =
+      example.sentences.map { this.tokensEncodersPool.getItem() }
     val output: DenseNDArray = this.classifier.forward(
-      input = example.sentences.map { EncodedSentence(this.tokensEncoder.forward(it)) })
+      input = example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) })
 
     return if (this.predictionIsCorrect(output, example.outputGold)) 1 else 0
   }
