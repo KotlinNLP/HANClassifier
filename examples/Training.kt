@@ -78,21 +78,21 @@ fun main(args: Array<String>) = mainBody {
       propagateToInput = true),
     updateMethod = ADAMMethod(stepSize = 0.001),
     tokensEncoder = tokensEncoder,
-    tokensEncoderOptimizer = tokensEncoder.model.buildOptimizer(updateMethod = AdaGradMethod(learningRate = 0.1))
+    tokensEncoderOptimizer = tokensEncoder.model.buildOptimizer(updateMethod = AdaGradMethod(learningRate = 0.1)),
+    onSaveModel = {
+      println("Saving re-trained embeddings to '${parsedArgs.trainedEmbeddingsPath}'...")
+      embeddingsMap.dump(parsedArgs.trainedEmbeddingsPath, digits = 6)
+    }
   ).train(
     trainingSet = dataset.training,
     validationSet = dataset.validation,
     epochs = 10,
     modelFilename = parsedArgs.modelPath)
 
-  parsedArgs.trainedEmbeddingsPath.let {
-    embeddingsMap.dump(it, digits = 6)
-    println("\nSaving re-trained embeddings to '$it'...")
-  }
-
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val accuracy: Double = Validator(model = model, tokensEncoder = tokensEncoder).validate(testSet = dataset.test)
+  val accuracy: Double =
+    Validator(model = model, tokensEncoderModel = tokensEncoder.model).validate(testSet = dataset.test)
 
   println("Accuracy: %.2f%%".format(100.0 * accuracy))
 }
