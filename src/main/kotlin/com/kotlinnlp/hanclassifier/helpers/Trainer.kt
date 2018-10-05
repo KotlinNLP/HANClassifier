@@ -30,14 +30,15 @@ import java.io.FileOutputStream
  * @property classifier the [HANClassifier] to train
  * @param tokensEncoder the tokens encoder to encode the input
  * @param tokensEncoderOptimizer the optimizer of the tokens encoder (null if the tokens encoder must not be trained)
+ * @param updateMethod the update method for the parameters of the [classifier]
+ * @param onSaveModel a callback called when saving a new best model
  */
 class Trainer(
   private val classifier: HANClassifier,
   tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>,
   private val tokensEncoderOptimizer: TokensEncoderOptimizer? = null,
   updateMethod: UpdateMethod<*>,
-  private val tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>,
-  private val tokensEncoderOptimizer: TokensEncoderOptimizer? = null
+  private val onSaveModel: () -> Unit = {}
 ) {
 
   /**
@@ -213,6 +214,8 @@ class Trainer(
       this.classifier.model.dump(FileOutputStream(File(modelFilename)))
 
       println("NEW BEST ACCURACY! Model saved to \"$modelFilename\"")
+
+      this.onSaveModel()
     }
   }
 
