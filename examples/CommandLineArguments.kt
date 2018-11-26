@@ -40,9 +40,9 @@ internal class CommandLineArguments(args: Array<String>) {
   /**
    * The number of classes that can be predicted.
    */
-  val classesNumber: Int by parser.storing(
+  val numOfClasses: Int by parser.storing(
     "-c",
-    "--classes-number",
+    "--num-of-classes",
     help="the number of classes that can be predicted"
   ) { toInt() }
 

@@ -67,7 +67,7 @@ fun main(args: Array<String>) = mainBody {
     tokensEncodingsSize = tokensEncoder.model.tokenEncodingSize,
     attentionSize = 100,
     recurrentConnectionType = LayerType.Connection.RAN,
-    outputSize = parsedArgs.classesNumber)
+    outputSize = parsedArgs.numOfClasses)
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
