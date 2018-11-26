@@ -20,15 +20,15 @@ import java.io.Serializable
  * The [HANClassifier] model.
  *
  * @param name the name of the model
+ * @param numOfClasses the number of classes that can be predicted
  * @param tokensEncodingsSize the size of the tokens encodings
- * @param outputSize the size of the output
  * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
 class HANClassifierModel(
   val name: String,
+  numOfClasses: Int,
   tokensEncodingsSize: Int,
-  outputSize: Int,
   attentionSize: Int = 20,
   recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
 ) : Serializable {
@@ -61,7 +61,7 @@ class HANClassifierModel(
     biRNNsActivation = Tanh(),
     biRNNsConnectionType = recurrentConnectionType,
     attentionSize = attentionSize,
-    outputSize = outputSize,
+    outputSize = numOfClasses,
     outputActivation = Softmax())
 
   /**
