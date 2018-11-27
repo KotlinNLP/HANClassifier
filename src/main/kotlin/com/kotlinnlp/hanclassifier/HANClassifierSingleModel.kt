@@ -17,7 +17,7 @@ import java.io.OutputStream
 import java.io.Serializable
 
 /**
- * The [HANClassifier] model.
+ * The [HANClassifierSingle] model.
  *
  * @param name the name of the model
  * @param numOfClasses the number of classes that can be predicted
@@ -25,7 +25,7 @@ import java.io.Serializable
  * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
-class HANClassifierModel(
+class HANClassifierSingleModel(
   val name: String,
   numOfClasses: Int,
   tokensEncodingsSize: Int,
@@ -42,13 +42,13 @@ class HANClassifierModel(
     private const val serialVersionUID: Long = 1L
 
     /**
-     * Read a [HANClassifierModel] (serialized) from an input stream and decode it.
+     * Read a [HANClassifierSingleModel] (serialized) from an input stream and decode it.
      *
-     * @param inputStream the [InputStream] from which to read the serialized [HANClassifierModel]
+     * @param inputStream the [InputStream] from which to read the serialized [HANClassifierSingleModel]
      *
-     * @return the [HANClassifierModel] read from [inputStream] and decoded
+     * @return the [HANClassifierSingleModel] read from [inputStream] and decoded
      */
-    fun load(inputStream: InputStream): HANClassifierModel = Serializer.deserialize(inputStream)
+    fun load(inputStream: InputStream): HANClassifierSingleModel = Serializer.deserialize(inputStream)
   }
 
   /**
@@ -65,9 +65,9 @@ class HANClassifierModel(
     outputActivation = Softmax())
 
   /**
-   * Serialize this [HANClassifierModel] and write it to an output stream.
+   * Serialize this [HANClassifierSingleModel] and write it to an output stream.
    *
-   * @param outputStream the [OutputStream] in which to write this serialized [HANClassifierModel]
+   * @param outputStream the [OutputStream] in which to write this serialized [HANClassifierSingleModel]
    */
   fun dump(outputStream: OutputStream) = Serializer.serialize(this, outputStream)
 }
