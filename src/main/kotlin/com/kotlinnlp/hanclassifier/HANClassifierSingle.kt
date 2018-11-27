@@ -8,21 +8,18 @@
 package com.kotlinnlp.hanclassifier
 
 import com.kotlinnlp.simplednn.core.neuralprocessor.NeuralProcessor
-import com.kotlinnlp.simplednn.deeplearning.attention.han.HANEncoder
-import com.kotlinnlp.simplednn.deeplearning.attention.han.HANParameters
-import com.kotlinnlp.simplednn.deeplearning.attention.han.HierarchyGroup
-import com.kotlinnlp.simplednn.deeplearning.attention.han.HierarchySequence
+import com.kotlinnlp.simplednn.deeplearning.attention.han.*
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
 /**
  * A classifier based on Hierarchic Attention Networks.
  *
- * @param model the model of this [HANClassifierSingle]
+ * @param han a HAN model
  * @param useDropout whether to apply the dropout during the forward (default = false)
  * @param propagateToInput whether to propagate the errors to the input during the backward (default = false)
  */
 class HANClassifierSingle(
-  val model: HANClassifierSingleModel,
+  val han: HAN,
   override val useDropout: Boolean = false,
   override val propagateToInput: Boolean = false,
   override val id: Int = 0
@@ -38,7 +35,7 @@ class HANClassifierSingle(
    * The [HANEncoder] used as classifier (Softmax output activation).
    */
   private val encoder = HANEncoder<DenseNDArray>(
-    model = this.model.han,
+    model = this.han,
     useDropout = this.useDropout,
     propagateToInput = this.propagateToInput)
 
