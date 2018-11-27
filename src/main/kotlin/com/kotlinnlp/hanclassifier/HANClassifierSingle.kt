@@ -18,7 +18,7 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
  * @param useDropout whether to apply the dropout during the forward (default = false)
  * @param propagateToInput whether to propagate the errors to the input during the backward (default = false)
  */
-class HANClassifierSingle(
+internal class HANClassifierSingle(
   val han: HAN,
   override val useDropout: Boolean = false,
   override val propagateToInput: Boolean = false,
