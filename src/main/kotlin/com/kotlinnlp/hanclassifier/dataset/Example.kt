@@ -14,6 +14,6 @@ import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
  * An example to train or test the HAN classifier.
  *
  * @property sentences a list of sentences
- * @property outputGold the index of the gold class
+ * @property goldClasses the indices of the gold classes, in hierarchical order from the top to the bottom
  */
-data class Example(val sentences: List<Sentence<FormToken>>, val outputGold: Int)
+data class Example(val sentences: List<Sentence<FormToken>>, val goldClasses: List<Int>)
