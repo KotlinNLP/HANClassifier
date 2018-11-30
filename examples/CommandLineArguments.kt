@@ -38,15 +38,6 @@ internal class CommandLineArguments(args: Array<String>) {
   )
 
   /**
-   * The number of classes that can be predicted.
-   */
-  val numOfClasses: Int by parser.storing(
-    "-c",
-    "--num-of-classes",
-    help="the number of classes that can be predicted"
-  ) { toInt() }
-
-  /**
    * The file path of the training dataset.
    */
   val trainingSetPath: String by parser.storing(
