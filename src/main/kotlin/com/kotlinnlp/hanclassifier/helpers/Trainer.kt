@@ -9,6 +9,7 @@ package com.kotlinnlp.hanclassifier.helpers
 
 import com.kotlinnlp.hanclassifier.EncodedSentence
 import com.kotlinnlp.hanclassifier.HANClassifier
+import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
@@ -37,9 +38,17 @@ class Trainer(
   private val classifier: HANClassifier,
   tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>,
   private val tokensEncoderOptimizer: TokensEncoderOptimizer? = null,
-  updateMethod: UpdateMethod<*>,
+  private val updateMethod: UpdateMethod<*>,
   private val onSaveModel: () -> Unit = {}
 ) {
+
+  /**
+   * The optimizer of a level classifier of the hierarchy.
+   */
+  private data class LevelOptimizer(
+    val optimizer: ParamsOptimizer<HANParameters>,
+    val subLevels: Map<Int, LevelOptimizer?>
+  )
 
   /**
    * When timing started.
@@ -64,11 +73,15 @@ class Trainer(
     useDropout = tokensEncoder.useDropout)
 
   /**
-   * The optimizer of the parameters of the [classifier].
+   * The list of all the HAN optimizers of all the levels.
+   * It is filled calling the [buildLevelOptimizer] method.
    */
-  private val classifierOptimizer: ParamsOptimizer<HANParameters> = ParamsOptimizer(
-    params = this.classifier.model.han.params,
-    updateMethod = updateMethod)
+  private val classifierOptimizers: MutableList<ParamsOptimizer<HANParameters>> = mutableListOf()
+
+  /**
+   * The optimizer of the parameters of the top level encoder of the [classifier].
+   */
+  private val topLevelOptimizer: LevelOptimizer = this.buildLevelOptimizer(this.classifier.model.topLevelModel)
 
   /**
    * Train the [classifier] using the given [trainingSet], validating each epoch if a [validationSet] is given.
@@ -102,6 +115,24 @@ class Trainer(
         this.validateAndSaveModel(validationSet = validationSet, modelFilename = modelFilename)
       }
     }
+  }
+
+  /**
+   * Build the optimizer of the HAN of a given hierarchical level.
+   *
+   * @param levelModel the model of a hierarchical level
+   *
+   * @return a level optimizer
+   */
+  private fun buildLevelOptimizer(levelModel: HANClassifierModel.LevelModel): LevelOptimizer {
+
+    val levelOptimizer = LevelOptimizer(
+      optimizer = ParamsOptimizer(params = levelModel.han.params, updateMethod = this.updateMethod),
+      subLevels = levelModel.subLevels.mapValues { it.value?.let { model -> this.buildLevelOptimizer(model) } })
+
+    this.classifierOptimizers.add(levelOptimizer.optimizer)
+
+    return levelOptimizer
   }
 
   /**
@@ -146,28 +177,79 @@ class Trainer(
 
     val encoders: List<TokensEncoder<FormToken, Sentence<FormToken>>> =
       example.sentences.map { this.tokensEncodersPool.getItem() }
-    val output: DenseNDArray = this.classifier.forward(
-      input = example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) })
 
-    val errors: DenseNDArray = output.copy()
-    errors[example.outputGold] = errors[example.outputGold] - 1
+    val encodedSentences: List<EncodedSentence> =
+      example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) }
 
-    this.classifier.backward(errors)
-    this.classifierOptimizer.accumulate(this.classifier.getParamsErrors(copy = false))
+    val sentencesErrors: List<EncodedSentence> =
+      encodedSentences.map { s -> s.copy(tokens = s.tokens.map { it.zerosLike() }) }
+
+    this.trainLevelClassifier(
+      levelClassifier = this.classifier.topLevelClassifier,
+      levelOptimizer = this.topLevelOptimizer,
+      encodedSentences = encodedSentences,
+      sentencesErrors = sentencesErrors,
+      expectedClasses = if (this.classifier.model.hasSubLevels(example.goldClasses))
+        example.goldClasses + this.classifier.model.getNoClassIndex(example.goldClasses)
+      else
+        example.goldClasses
+    )
 
     this.tokensEncoderOptimizer?.let { optimizer ->
-      this.classifier.getInputErrors(copy = false).zip(encoders) { errors, encoder ->
-        encoder.backward(errors.tokens)
+      encoders.zip(sentencesErrors).forEach { (encoder, sentenceErrors) ->
+        encoder.backward(sentenceErrors.tokens)
         optimizer.accumulate(encoder.getParamsErrors())
       }
     }
   }
 
   /**
+   * Train the classifier of a specific level of the classes hierarchy.
+   *
+   * @param levelClassifier the level classifier
+   * @param levelOptimizer the level optimizer
+   * @param encodedSentences the input encoded sentences
+   * @param sentencesErrors the structures in which to accumulate the errors of the sentences
+   * @param expectedClasses the list of expected classes, following the hierarchical order from the top level
+   * @param levelIndex the index of the current level, as depth in the hierarchy
+   */
+  private fun trainLevelClassifier(levelClassifier: HANClassifier.LevelClassifier,
+                                   levelOptimizer: LevelOptimizer,
+                                   encodedSentences: List<EncodedSentence>,
+                                   sentencesErrors: List<EncodedSentence>,
+                                   expectedClasses: List<Int>,
+                                   levelIndex: Int = 0) {
+
+    val expectedClass: Int = expectedClasses[levelIndex]
+    val distribution: DenseNDArray = levelClassifier.classifier.forward(encodedSentences)
+
+    val errors: DenseNDArray = distribution.copy()
+    errors[expectedClass] = errors[expectedClass] - 1
+
+    levelClassifier.classifier.backward(errors)
+    levelOptimizer.optimizer.accumulate(levelClassifier.classifier.getParamsErrors(copy = false))
+
+    if (this.tokensEncoderOptimizer != null) {
+      levelClassifier.classifier.getInputErrors(copy = false).zip(sentencesErrors) { inputErrors, sentenceErrors ->
+        sentenceErrors.tokens.zip(inputErrors.tokens).forEach { it.first.assignSum(it.second) }
+      }
+    }
+
+    if (levelIndex < expectedClasses.lastIndex)
+      this.trainLevelClassifier(
+        levelClassifier = levelClassifier.subLevels.getValue(expectedClass)!!,
+        levelOptimizer = levelOptimizer.subLevels.getValue(expectedClass)!!,
+        encodedSentences = encodedSentences,
+        sentencesErrors = sentencesErrors,
+        expectedClasses = expectedClasses,
+        levelIndex = levelIndex + 1)
+  }
+
+  /**
    * Method to call every new epoch.
    */
   private fun newEpoch() {
-    this.classifierOptimizer.newEpoch()
+    this.classifierOptimizers.forEach { it.newEpoch() }
     this.tokensEncoderOptimizer?.newEpoch()
   }
 
@@ -175,7 +257,7 @@ class Trainer(
    * Method to call every new batch.
    */
   private fun newBatch() {
-    this.classifierOptimizer.newBatch()
+    this.classifierOptimizers.forEach { it.newBatch() }
     this.tokensEncoderOptimizer?.newBatch()
   }
 
@@ -183,7 +265,7 @@ class Trainer(
    * Method to call every new example.
    */
   private fun newExample() {
-    this.classifierOptimizer.newExample()
+    this.classifierOptimizers.forEach { it.newExample() }
     this.tokensEncoderOptimizer?.newExample()
   }
 
@@ -191,7 +273,7 @@ class Trainer(
    * Optimizers update.
    */
   private fun update() {
-    this.classifierOptimizer.update()
+    this.classifierOptimizers.forEach { it.update() }
     this.tokensEncoderOptimizer?.update()
   }
 
