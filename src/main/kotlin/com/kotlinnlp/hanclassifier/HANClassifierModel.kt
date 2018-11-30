@@ -86,7 +86,7 @@ class HANClassifierModel(
    *
    * @return true if the last level of the given hierarchy has sub-level itself, otherwise false
    */
-  fun hasSubLevels(classHierarchy: List<Int>): Boolean {
+  internal fun hasSubLevels(classHierarchy: List<Int>): Boolean {
 
     var levelModel: LevelModel? = this.topLevelModel
 
