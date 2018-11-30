@@ -19,15 +19,15 @@ import java.io.Serializable
 /**
  * The [HANClassifier] model.
  *
- * @param name the name of the model
- * @param classesConfig the configurations of the hierarchy of classes that can be predicted
+ * @property name the name of the model
+ * @property classesConfig the configurations of the hierarchy of classes that can be predicted
  * @param tokensEncodingsSize the size of the tokens encodings
  * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
 class HANClassifierModel(
   val name: String,
-  classesConfig: ClassesConfig,
+  val classesConfig: ClassesConfig,
   private val tokensEncodingsSize: Int,
   private val attentionSize: Int = 20,
   private val recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
