@@ -62,7 +62,7 @@ class HANClassifier(
     val predictedClass: Int = output.single().argMaxIndex()
     val subLevelClassifier: HANClassifier.LevelClassifier? = levelClassifier.subLevels[predictedClass]
 
-    return if (subLevelClassifier != null)
+    return if (subLevelClassifier != null && (levelIndex == 0 || predictedClass > 0))
       output + this.forwardLevel(input = input, levelClassifier = subLevelClassifier, levelIndex = levelIndex + 1)
     else
       output
