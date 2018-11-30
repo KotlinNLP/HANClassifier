@@ -32,8 +32,8 @@ data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) : Serializable {
    * @return true if this classes configuration is complete, otherwise false
    */
   fun isComplete(): Boolean =
-    this.classes.keys.min() == 1 &&
-      this.classes.keys.max() == this.classes.size &&
+    this.classes.keys.min() == 0 &&
+      this.classes.keys.max() == (this.classes.size - 1) &&
       this.classes.values.all { it?.isComplete() ?: true }
 
   /**

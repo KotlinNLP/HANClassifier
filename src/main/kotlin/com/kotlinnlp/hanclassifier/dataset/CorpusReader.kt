@@ -57,7 +57,7 @@ class CorpusReader(private val verbose: Boolean = true) {
       val sentences = parsedExample.array<JsonArray<String>>("text")!!
       val classes: List<Int> = parsedExample.array("classes")!!
 
-      require(classes.all { it >= 1 }) { "The class index must be >= 1" }
+      require(classes.all { it >= 0 }) { "The class index must be >= 0" }
 
       examples.add(Example(
         sentences = sentences.map { forms -> Sentence(tokens = forms.map { Token(form = it) }) },
