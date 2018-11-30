@@ -88,11 +88,25 @@ class HANClassifierModel(
    */
   internal fun hasSubLevels(classHierarchy: List<Int>): Boolean {
 
-    var levelModel: LevelModel? = this.topLevelModel
+    var classConfig: ClassesConfig? = this.classesConfig
 
-    classHierarchy.forEach { levelModel = levelModel!!.subLevels[it] }
+    classHierarchy.forEach { classConfig = classConfig!!.classes[it] }
 
-    return levelModel != null
+    return classConfig != null
+  }
+
+  /**
+   * @param classHierarchy a list of classes following their hierarchical order
+   *
+   * @return the index of the 'no-class' of the hierarchical level defined by the given class hierarchy
+   */
+  internal fun getNoClassIndex(classHierarchy: List<Int>): Int {
+
+    var classConfig: ClassesConfig = this.classesConfig
+
+    classHierarchy.forEach { classConfig = classConfig.classes[it]!! }
+
+    return classConfig.classes.size
   }
 
   /**
