@@ -16,11 +16,13 @@ import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.tokensencoder.embeddings.keyextractor.NormWordKeyExtractor
 import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
 import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMapByDictionary
+import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoder
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
+import com.kotlinnlp.tokensencoder.reduction.ReductionEncoder
+import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
 import com.xenomachina.argparser.mainBody
 
 /**
@@ -37,11 +39,17 @@ fun main(args: Array<String>) = mainBody {
     EMBDLoader().load(it)
   }
 
-  val tokensEncoder = EmbeddingsEncoder<FormToken, Sentence<FormToken>>(
-    model = EmbeddingsEncoderModel(
-      embeddingsMap = embeddingsMap,
-      embeddingKeyExtractor = NormWordKeyExtractor()),
-    useDropout = true)
+  val embeddingsEncoderModel = EmbeddingsEncoderModel<FormToken, Sentence<FormToken>>(
+    embeddingsMap = embeddingsMap,
+    embeddingKeyExtractor = NormWordKeyExtractor())
+
+  val tokensEncoder = ReductionEncoder(
+    model = ReductionEncoderModel(
+      inputEncoderModel = embeddingsEncoderModel,
+      tokenEncodingSize = 50,
+      activationFunction = Tanh()),
+    useDropout = true
+  )
 
   val corpusReader = CorpusReader()
   val dataset = Dataset(
@@ -59,12 +67,12 @@ fun main(args: Array<String>) = mainBody {
     })
 
   dataset.training.forEach { example ->
-    example.sentences.forEach { s -> s.tokens.forEach { tokensEncoder.model.embeddingsMap.dictionary.add(it.form) } }
+    example.sentences.forEach { s -> s.tokens.forEach { embeddingsEncoderModel.embeddingsMap.dictionary.add(it.form) } }
   }
 
   val model = HANClassifierModel(
     name = parsedArgs.modelName,
-    numOfClasses = parsedArgs.numOfClasses,
+    classesConfig = dataset.classesConfig,
     tokensEncodingsSize = tokensEncoder.model.tokenEncodingSize,
     attentionSize = 100,
     recurrentConnectionType = LayerType.Connection.RAN)
