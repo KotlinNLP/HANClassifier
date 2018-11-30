@@ -7,12 +7,23 @@
 
 package com.kotlinnlp.hanclassifier
 
+import java.io.Serializable
+
 /**
  * The configuration of a hierarchy of classes for the classification.
  *
  * @property classes a map of classes indices to the configuration (optional) of their sub-levels
  */
-data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) {
+data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) : Serializable {
+
+  companion object {
+
+    /**
+     * Private val used to serialize the class (needed by Serializable).
+     */
+    @Suppress("unused")
+    private const val serialVersionUID: Long = 1L
+  }
 
   /**
    * A classes configuration is considered complete if it defines a complete classes set, sequential and starting
