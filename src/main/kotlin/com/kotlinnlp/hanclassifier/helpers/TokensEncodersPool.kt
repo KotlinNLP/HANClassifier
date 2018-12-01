@@ -33,4 +33,18 @@ internal class TokensEncodersPool(
    */
   override fun itemFactory(id: Int): TokensEncoder<FormToken, Sentence<FormToken>> =
     this.model.buildEncoder(useDropout = this.useDropout, id = id)
+
+  /**
+   * Release all the items of the pool and return a given number of available encoders.
+   *
+   * @param size the number of tokens encoder to return
+   *
+   * @return a list of tokens encoders
+   */
+  fun getEncoders(size: Int): List<TokensEncoder<FormToken, Sentence<FormToken>>> {
+
+    this.releaseAll()
+
+    return List(size = size, init = { this.getItem() })
+  }
 }

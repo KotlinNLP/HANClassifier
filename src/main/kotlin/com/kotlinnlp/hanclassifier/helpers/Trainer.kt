@@ -175,7 +175,8 @@ class Trainer(
    */
   private fun learnFromExample(example: Example) {
 
-    val encoders: List<TokensEncoder<FormToken, Sentence<FormToken>>> = this.getTokensEncoders(example.sentences.size)
+    val encoders: List<TokensEncoder<FormToken, Sentence<FormToken>>> =
+      this.tokensEncodersPool.getEncoders(example.sentences.size)
 
     val encodedSentences: List<EncodedSentence> =
       example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) }
@@ -200,18 +201,6 @@ class Trainer(
         optimizer.accumulate(encoder.getParamsErrors())
       }
     }
-  }
-
-  /**
-   * @param size the number of tokens encoder to return
-   *
-   * @return a list of tokens encoders got from the pool
-   */
-  private fun getTokensEncoders(size: Int): List<TokensEncoder<FormToken, Sentence<FormToken>>> {
-
-    this.tokensEncodersPool.releaseAll()
-
-    return List(size = size, init = { this.tokensEncodersPool.getItem() })
   }
 
   /**
