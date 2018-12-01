@@ -104,6 +104,6 @@ fun main(args: Array<String>) = mainBody {
     Validator(model = model, tokensEncoderModel = tokensEncoder.model).validate(testSet = dataset.test)
   val accuracy: Double = metrics.map { it.f1Score }.average()
 
-  println("Final accuracy (f1 average): %5.2f %%".format(accuracy))
+  println("Final accuracy (f1 average): %5.2f %%".format(100 * accuracy))
   metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
 }

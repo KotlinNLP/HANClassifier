@@ -289,7 +289,7 @@ class Trainer(
     val metrics: List<MetricCounter> = this.validateEpoch(validationSet)
     val accuracy: Double = metrics.map { it.f1Score }.average()
 
-    println("Accuracy (f1 average): %5.2f %%".format(accuracy))
+    println("Accuracy (f1 average): %5.2f %%".format(100 * accuracy))
     metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
 
     if (modelFilename != null && accuracy > this.bestAccuracy) {
