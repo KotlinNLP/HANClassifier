@@ -26,6 +26,16 @@ data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) : Serializable {
   }
 
   /**
+   * The depth of the hierarchy.
+   */
+  val depth: Int by lazy {
+    this.classes.values
+      .asSequence()
+      .map { 1 + (it?.depth ?: 0) }
+      .max()!!
+  }
+
+  /**
    * A classes configuration is considered complete if it defines a complete classes set, sequential and starting
    * from 1.
    *
