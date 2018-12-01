@@ -23,6 +23,7 @@ import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
 import com.kotlinnlp.tokensencoder.reduction.ReductionEncoder
 import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
+import com.kotlinnlp.utils.stats.MetricCounter
 import com.xenomachina.argparser.mainBody
 
 /**
@@ -99,8 +100,10 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val accuracy: Double =
+  val metrics: List<MetricCounter> =
     Validator(model = model, tokensEncoderModel = tokensEncoder.model).validate(testSet = dataset.test)
+  val accuracy: Double = metrics.map { it.f1Score }.average()
 
-  println("Accuracy: %.2f%%".format(100.0 * accuracy))
+  println("Final accuracy (f1 average): %5.2f %%".format(accuracy))
+  metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
 }
