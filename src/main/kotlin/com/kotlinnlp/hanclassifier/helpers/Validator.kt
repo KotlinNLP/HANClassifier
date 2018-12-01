@@ -63,6 +63,7 @@ class Validator(
     val progress = ProgressIndicatorBar(testSet.size)
 
     this.startTiming()
+    this.metricsPerLevel.forEach { it.reset() }
 
     testSet.forEach { example ->
 
@@ -89,26 +90,32 @@ class Validator(
     val predictions: List<DenseNDArray> = this.classifier.classify(
       input = example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) })
 
-    example.goldClasses.forEachIndexed { levelIndex, goldClass ->
+    val expectedClasses: List<Int> = if (this.classifier.model.hasSubLevels(example.goldClasses))
+        example.goldClasses + this.classifier.model.getNoClassIndex(example.goldClasses)
+      else
+        example.goldClasses
+
+    expectedClasses.forEachIndexed { levelIndex, goldClass ->
 
       val metric: MetricCounter = this.metricsPerLevel[levelIndex]
+      val prediction: DenseNDArray = predictions[levelIndex]
 
       when {
-        levelIndex < predictions.size -> metric.falseNeg++
-        this.predictionIsCorrect(predictions[levelIndex], goldClass) -> metric.truePos++
+        levelIndex > predictions.lastIndex -> metric.falseNeg++
+        this.predictionIsCorrect(prediction, goldClass) -> metric.truePos++
         else -> metric.falsePos++
       }
     }
   }
 
   /**
-   * @param output an output prediction of the HAN classifier
-   * @param goldOutput the expected gold output class
+   * @param prediction a prediction of the classifier
+   * @param goldClass the expected class
    *
-   * @return a Boolean indicating if the [output] matches the [goldOutput]
+   * @return true if the [prediction] indicates the [goldClass], otherwise false
    */
-  private fun predictionIsCorrect(output: DenseNDArray, goldOutput: Int): Boolean {
-    return output.argMaxIndex() == goldOutput
+  private fun predictionIsCorrect(prediction: DenseNDArray, goldClass: Int): Boolean {
+    return prediction.argMaxIndex() == goldClass
   }
 
   /**
