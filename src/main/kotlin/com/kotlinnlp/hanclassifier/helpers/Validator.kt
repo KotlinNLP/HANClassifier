@@ -7,9 +7,7 @@
 
 package com.kotlinnlp.hanclassifier.helpers
 
-import com.kotlinnlp.hanclassifier.EncodedSentence
-import com.kotlinnlp.hanclassifier.HANClassifier
-import com.kotlinnlp.hanclassifier.HANClassifierModel
+import com.kotlinnlp.hanclassifier.*
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
@@ -17,6 +15,7 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.tokensencoder.TokensEncoder
 import com.kotlinnlp.tokensencoder.TokensEncoderModel
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
+import com.kotlinnlp.utils.stats.MetricCounter
 
 /**
  * A helper for the validation of a [HANClassifier].
@@ -43,6 +42,11 @@ class Validator(
     propagateToInput = false)
 
   /**
+   * The metric counters per hierarchical level.
+   */
+  private val metricsPerLevel: List<MetricCounter> = List(size = model.classesConfig.depth, init = { MetricCounter() })
+
+  /**
    * When timing started.
    */
   private var startTime: Long = 0
@@ -52,11 +56,10 @@ class Validator(
    *
    * @param testSet the test dataset to validate the [classifier]
    *
-   * @return the accuracy of the [classifier]
+   * @return a list of metric counters, one for each hierarchical level
    */
-  fun validate(testSet: List<Example>): Double {
+  fun validate(testSet: List<Example>): List<MetricCounter> {
 
-    var correctPredictions = 0
     val progress = ProgressIndicatorBar(testSet.size)
 
     this.startTiming()
@@ -65,29 +68,37 @@ class Validator(
 
       progress.tick()
 
-      correctPredictions += this.validateExample(example)
+      this.validateExample(example)
     }
 
     println("Elapsed time: %s".format(this.formatElapsedTime()))
 
-    return correctPredictions.toDouble() / testSet.size
+    return this.metricsPerLevel
   }
 
   /**
    * Validate the HAN classifier with the given [example].
    *
    * @param example an example of the validation dataset
-   *
-   * @return 1 if the prediction is correct, 0 otherwise
    */
-  private fun validateExample(example: Example): Int {
+  private fun validateExample(example: Example) {
 
     val encoders: List<TokensEncoder<FormToken, Sentence<FormToken>>> =
       example.sentences.map { this.tokensEncodersPool.getItem() }
-    val output: DenseNDArray = this.classifier.forward(
+
+    val predictions: List<DenseNDArray> = this.classifier.classify(
       input = example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) })
 
-    return if (this.predictionIsCorrect(output, example.outputGold)) 1 else 0
+    example.goldClasses.forEachIndexed { levelIndex, goldClass ->
+
+      val metric: MetricCounter = this.metricsPerLevel[levelIndex]
+
+      when {
+        levelIndex < predictions.size -> metric.falseNeg++
+        this.predictionIsCorrect(predictions[levelIndex], goldClass) -> metric.truePos++
+        else -> metric.falsePos++
+      }
+    }
   }
 
   /**

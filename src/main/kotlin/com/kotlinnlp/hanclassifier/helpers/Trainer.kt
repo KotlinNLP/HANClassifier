@@ -22,6 +22,7 @@ import com.kotlinnlp.tokensencoder.TokensEncoderOptimizer
 import com.kotlinnlp.utils.ExamplesIndices
 import com.kotlinnlp.utils.Shuffler
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
+import com.kotlinnlp.utils.stats.MetricCounter
 import java.io.File
 import java.io.FileOutputStream
 
@@ -285,9 +286,11 @@ class Trainer(
    */
   private fun validateAndSaveModel(validationSet: List<Example>, modelFilename: String?) {
 
-    val accuracy = this.validateEpoch(validationSet)
+    val metrics: List<MetricCounter> = this.validateEpoch(validationSet)
+    val accuracy: Double = metrics.map { it.f1Score }.average()
 
-    println("Accuracy: %.2f%%".format(100.0 * accuracy))
+    println("Accuracy (f1 average): %5.2f %%".format(accuracy))
+    metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
 
     if (modelFilename != null && accuracy > this.bestAccuracy) {
 
@@ -306,9 +309,9 @@ class Trainer(
    *
    * @param validationSet the validation dataset to validate the [classifier]
    *
-   * @return the current accuracy of the [classifier]
+   * @return a list of metric counters, one for each hierarchical level
    */
-  private fun validateEpoch(validationSet: List<Example>): Double {
+  private fun validateEpoch(validationSet: List<Example>): List<MetricCounter> {
 
     println("Epoch validation on %d sentences".format(validationSet.size))
 
