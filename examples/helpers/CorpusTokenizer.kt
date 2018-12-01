@@ -71,15 +71,14 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
    */
   private fun convertLine(line: String): String {
 
-    val parsedExample = this.jsonParser.parse(StringBuilder(line)) as JsonArray<*>
+    val jsonExample: JsonObject = this.jsonParser.parse(StringBuilder(line)) as JsonObject
+    val text: String = jsonExample.string("text")!!
 
-    val tokenizedText: List<Sentence> = this.tokenizer.tokenize(text = parsedExample[0] as String)
-    val outputClass: Int = parsedExample[1] as Int
+    val tokenizedText: List<Sentence> = this.tokenizer.tokenize(text)
 
-    return JsonObject(mapOf(
-      Pair("text", tokenizedText.toJsonArray()),
-      Pair("class", outputClass)
-    )).toJsonString()
+    jsonExample["text"] = tokenizedText.toJsonArray()
+
+    return jsonExample.toJsonString()
   }
 
   /**
