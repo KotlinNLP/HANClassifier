@@ -49,7 +49,7 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
     val outputFile = File(outputFilename)
     val progress = ProgressIndicatorBar(total = inputFile.reader().getLinesCount())
 
-    println("Tokenize corpus: '$inputFilename'")
+    println("Input corpus: '$inputFilename'")
     println("Output file: '$outputFilename'")
 
     outputFile.writer().write("") // Empty file
