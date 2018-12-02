@@ -36,7 +36,8 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
   private val jsonParser: Parser = Parser()
 
   /**
-   * Convert each example of a corpus from the format 1 to the format 2, tokenizing the texts.
+   * Convert each example of a corpus from the format 1 to the format 2, tokenizing the texts and removing the examples
+   * with empty texts.
    *   Format 1: tuple of <plain text> and <gold class>.
    *   Format 2: object with fields 'text' (as list of sentences, themselves as list of tokens) and 'class' (gold).
    *
@@ -58,7 +59,7 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
 
       progress.tick()
 
-      outputFile.appendText(this.convertLine(line) + "\n")
+      this.convertLine(line)?.let { outputFile.appendText(it.toJsonString() + "\n") }
     }
   }
 
@@ -67,18 +68,24 @@ class CorpusTokenizer(tokenizerModelFilename: String) {
    *
    * @param line the input line
    *
-   * @return the converted line as JSON string
+   * @return the converted line as JSON object or null if the tokenized text is empty
    */
-  private fun convertLine(line: String): String {
+  private fun convertLine(line: String): JsonObject? {
 
     val jsonExample: JsonObject = this.jsonParser.parse(StringBuilder(line)) as JsonObject
     val text: String = jsonExample.string("text")!!
 
-    val tokenizedText: List<Sentence> = this.tokenizer.tokenize(text)
+    val tokenizedText: List<Sentence> = this.tokenizer.tokenize(text).filter { it.tokens.isNotEmpty() }
 
-    jsonExample["text"] = tokenizedText.toJsonArray()
+    return if (tokenizedText.isNotEmpty()) {
 
-    return jsonExample.toJsonString()
+      jsonExample["text"] = tokenizedText.toJsonArray()
+
+      jsonExample
+
+    } else {
+      null
+    }
   }
 
   /**
