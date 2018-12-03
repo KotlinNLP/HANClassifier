@@ -98,11 +98,11 @@ class Validator(
     expectedClasses.forEachIndexed { levelIndex, goldClass ->
 
       val metric: MetricCounter = this.metricsPerLevel[levelIndex]
-      val prediction: DenseNDArray = predictions[levelIndex]
 
       when {
         levelIndex > predictions.lastIndex -> metric.falseNeg++
-        this.predictionIsCorrect(prediction, goldClass) -> metric.truePos++
+        this.predictionIsCorrect(predictions[levelIndex], goldClass) -> metric.truePos++
+        levelIndex > 0 && goldClass == (predictions[levelIndex].length - 1) -> metric.falseNeg++
         else -> metric.falsePos++
       }
     }
