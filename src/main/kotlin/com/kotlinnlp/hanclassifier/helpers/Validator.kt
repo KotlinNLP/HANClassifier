@@ -9,11 +9,7 @@ package com.kotlinnlp.hanclassifier.helpers
 
 import com.kotlinnlp.hanclassifier.*
 import com.kotlinnlp.hanclassifier.dataset.Example
-import com.kotlinnlp.linguisticdescription.sentence.Sentence
-import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
-import com.kotlinnlp.tokensencoder.TokensEncoder
-import com.kotlinnlp.tokensencoder.TokensEncoderModel
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import com.kotlinnlp.utils.stats.MetricCounter
 
@@ -21,17 +17,8 @@ import com.kotlinnlp.utils.stats.MetricCounter
  * A helper for the validation of a [HANClassifier].
  *
  * @param model the [HANClassifier] model to validate
- * @param tokensEncoderModel the model of a tokens encoder to encode the input
  */
-class Validator(
-  model: HANClassifierModel,
-  tokensEncoderModel: TokensEncoderModel<FormToken, Sentence<FormToken>>
-) {
-
-  /**
-   * A pool of tokens encoders to encode the input.
-   */
-  private val tokensEncodersPool = TokensEncodersPool(model = tokensEncoderModel, useDropout = false)
+class Validator(model: HANClassifierModel) {
 
   /**
    * The classifier initialized with the model.
@@ -84,11 +71,7 @@ class Validator(
    */
   private fun validateExample(example: Example) {
 
-    val encoders: List<TokensEncoder<FormToken, Sentence<FormToken>>> =
-      example.sentences.map { this.tokensEncodersPool.getItem() }
-
-    val predictions: List<DenseNDArray> = this.classifier.classify(
-      input = example.sentences.zip(encoders) { sentence, encoder -> EncodedSentence(encoder.forward(sentence)) })
+    val predictions: List<DenseNDArray> = this.classifier.classify(example.sentences)
 
     val expectedClasses: List<Int> = if (this.classifier.model.hasSubLevels(example.goldClasses))
         example.goldClasses + this.classifier.model.getNoClassIndex(example.goldClasses)

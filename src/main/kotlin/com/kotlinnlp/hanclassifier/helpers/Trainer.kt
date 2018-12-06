@@ -29,17 +29,18 @@ import java.io.FileOutputStream
 /**
  * A helper for the training of a [HANClassifier].
  *
- * @property classifier the [HANClassifier] to train
- * @param tokensEncoder the tokens encoder to encode the input
- * @param tokensEncoderOptimizer the optimizer of the tokens encoder (null if the tokens encoder must not be trained)
- * @param updateMethod the update method for the parameters of the [classifier]
+ * @property model the model to train
+ * @param tokensEncoderUpdateMethod the update method for the parameters of the tokens encoder (null if must not be
+ *                                  trained)
+ * @param classifierUpdateMethod the update method for the parameters of the HAN classifier
+ * @param useDropout whether to apply the dropout of the input
  * @param onSaveModel a callback called when saving a new best model
  */
 class Trainer(
-  private val classifier: HANClassifier,
-  tokensEncoder: TokensEncoder<FormToken, Sentence<FormToken>>,
-  private val tokensEncoderOptimizer: TokensEncoderOptimizer? = null,
-  private val updateMethod: UpdateMethod<*>,
+  private val model: HANClassifierModel,
+  tokensEncoderUpdateMethod: UpdateMethod<*>? = null,
+  private val classifierUpdateMethod: UpdateMethod<*>,
+  useDropout: Boolean,
   private val onSaveModel: () -> Unit = {}
 ) {
 
@@ -62,16 +63,26 @@ class Trainer(
   private var bestAccuracy: Double = 0.0
 
   /**
+   * A HAN classifier with the given model.
+   */
+  private val classifier = HANClassifier(model = this.model, useDropout = useDropout, propagateToInput = true)
+
+  /**
    * The helper for the validation of the [classifier].
    */
-  private val validationHelper = Validator(model = this.classifier.model, tokensEncoderModel = tokensEncoder.model)
+  private val validationHelper = Validator(model = this.classifier.model)
 
   /**
    * A pool of tokens encoders to encode the input.
    */
-  private val tokensEncodersPool = TokensEncodersPool(
-    model = tokensEncoder.model,
-    useDropout = tokensEncoder.useDropout)
+  private val tokensEncodersPool = TokensEncodersPool(model = this.model.tokensEncoder, useDropout = useDropout)
+
+  /**
+   * The optimizer of the tokens encoder.
+   * It is null if it must not be trained.
+   */
+  private val tokensEncoderOptimizer: TokensEncoderOptimizer? =
+    tokensEncoderUpdateMethod?.let { model.tokensEncoder.buildOptimizer(updateMethod = it) }
 
   /**
    * The list of all the HAN optimizers of all the levels.
@@ -128,7 +139,7 @@ class Trainer(
   private fun buildLevelOptimizer(levelModel: HANClassifierModel.LevelModel): LevelOptimizer {
 
     val levelOptimizer = LevelOptimizer(
-      optimizer = ParamsOptimizer(params = levelModel.han.params, updateMethod = this.updateMethod),
+      optimizer = ParamsOptimizer(params = levelModel.han.params, updateMethod = this.classifierUpdateMethod),
       subLevels = levelModel.subLevels.mapValues { it.value?.let { model -> this.buildLevelOptimizer(model) } })
 
     this.classifierOptimizers.add(levelOptimizer.optimizer)

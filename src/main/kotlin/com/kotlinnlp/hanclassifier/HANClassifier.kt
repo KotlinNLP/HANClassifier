@@ -7,6 +7,9 @@
 
 package com.kotlinnlp.hanclassifier
 
+import com.kotlinnlp.hanclassifier.helpers.TokensEncodersPool
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
 /**
@@ -36,19 +39,26 @@ class HANClassifier(
   internal val topLevelClassifier: LevelClassifier = this.buildLevelClassifier(this.model.topLevelModel)
 
   /**
-   * Classify the given [input].
+   * A pool of tokens encoders to encode the input.
+   */
+  private val tokensEncodersPool = TokensEncodersPool(model = this.model.tokensEncoder, useDropout = false)
+
+  /**
+   * Classify the given [sentences].
    *
-   * @param input a list of encoded sentences
+   * @param sentences a list of encoded sentences
    *
    * @return the list with the probability distribution of the classification, one per hierarchical level
    */
-  fun classify(input: List<EncodedSentence>): List<DenseNDArray> =
-    this.forwardLevel(input = input, levelClassifier = this.topLevelClassifier)
+  fun classify(sentences: List<Sentence<FormToken>>): List<DenseNDArray> =
+    this.forwardLevel(
+      input = sentences.map { EncodedSentence(this.tokensEncodersPool.getItem().forward(it)) },
+      levelClassifier = this.topLevelClassifier)
 
   /**
    * Classify the given [input].
    *
-   * @param input a list of encoded sentences
+   * @param input a list of sentences
    * @param levelClassifier the classifier for a given hierarchical level
    * @param levelIndex the index of the level
    *

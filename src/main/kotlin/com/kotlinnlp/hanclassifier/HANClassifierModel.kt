@@ -7,10 +7,13 @@
 
 package com.kotlinnlp.hanclassifier
 
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.deeplearning.attention.han.HAN
+import com.kotlinnlp.tokensencoder.TokensEncoderModel
 import com.kotlinnlp.utils.Serializer
 import java.io.InputStream
 import java.io.OutputStream
@@ -21,14 +24,14 @@ import java.io.Serializable
  *
  * @property name the name of the model
  * @property classesConfig the configurations of the hierarchy of classes that can be predicted
- * @param tokensEncodingsSize the size of the tokens encodings
+ * @param tokensEncoder the model of a tokens encoder to encode the input
  * @param attentionSize the size of the attention arrays (default = 20)
  * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
  */
 class HANClassifierModel(
   val name: String,
   val classesConfig: ClassesConfig,
-  private val tokensEncodingsSize: Int,
+  val tokensEncoder: TokensEncoderModel<FormToken, Sentence<FormToken>>,
   private val attentionSize: Int = 20,
   private val recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
 ) : Serializable {
@@ -118,7 +121,7 @@ class HANClassifierModel(
   private fun buildLevelModel(config: ClassesConfig, level: Int = 0): LevelModel = LevelModel(
     han = HAN(
       hierarchySize = 2,
-      inputSize = this.tokensEncodingsSize,
+      inputSize = this.tokensEncoder.tokenEncodingSize,
       inputType = LayerType.Input.Dense,
       biRNNsActivation = Tanh(),
       biRNNsConnectionType = this.recurrentConnectionType,
