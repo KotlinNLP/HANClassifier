@@ -79,10 +79,6 @@ fun main(args: Array<String>) = mainBody {
     model = model,
     classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
     tokensEncoderUpdateMethod = AdaGradMethod(learningRate = 0.1),
-    onSaveModel = {
-      println("Saving re-trained embeddings to '${parsedArgs.trainedEmbeddingsPath}'...")
-      embeddingsMap.dump(parsedArgs.trainedEmbeddingsPath, digits = 6)
-    },
     useDropout = true
   ).train(
     trainingSet = dataset.training,

@@ -34,14 +34,12 @@ import java.io.FileOutputStream
  *                                  trained)
  * @param classifierUpdateMethod the update method for the parameters of the HAN classifier
  * @param useDropout whether to apply the dropout of the input
- * @param onSaveModel a callback called when saving a new best model
  */
 class Trainer(
   private val model: HANClassifierModel,
   tokensEncoderUpdateMethod: UpdateMethod<*>? = null,
   private val classifierUpdateMethod: UpdateMethod<*>,
-  useDropout: Boolean,
-  private val onSaveModel: () -> Unit = {}
+  useDropout: Boolean
 ) {
 
   /**
@@ -310,8 +308,6 @@ class Trainer(
       this.classifier.model.dump(FileOutputStream(File(modelFilename)))
 
       println("NEW BEST ACCURACY! Model saved to \"$modelFilename\"")
-
-      this.onSaveModel()
     }
   }
 
