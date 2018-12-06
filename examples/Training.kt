@@ -5,7 +5,6 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
-import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
@@ -21,7 +20,6 @@ import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGra
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
-import com.kotlinnlp.tokensencoder.reduction.ReductionEncoder
 import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
 import com.kotlinnlp.utils.stats.MetricCounter
 import com.xenomachina.argparser.mainBody
@@ -44,13 +42,10 @@ fun main(args: Array<String>) = mainBody {
     embeddingsMap = embeddingsMap,
     embeddingKeyExtractor = NormWordKeyExtractor())
 
-  val tokensEncoder = ReductionEncoder(
-    model = ReductionEncoderModel(
-      inputEncoderModel = embeddingsEncoderModel,
-      tokenEncodingSize = 50,
-      activationFunction = Tanh()),
-    useDropout = true
-  )
+  val tokensEncoderModel = ReductionEncoderModel(
+    inputEncoderModel = embeddingsEncoderModel,
+    tokenEncodingSize = 50,
+    activationFunction = Tanh())
 
   val corpusReader = CorpusReader()
   val dataset = Dataset(
@@ -74,24 +69,21 @@ fun main(args: Array<String>) = mainBody {
   val model = HANClassifierModel(
     name = parsedArgs.modelName,
     classesConfig = dataset.classesConfig,
-    tokensEncodingsSize = tokensEncoder.model.tokenEncodingSize,
+    tokensEncoder = tokensEncoderModel,
     attentionSize = 100,
     recurrentConnectionType = LayerType.Connection.RAN)
 
   println("\n-- START TRAINING ON %d SENTENCES".format(dataset.training.size))
 
   Trainer(
-    classifier = HANClassifier(
-      model = model,
-      useDropout = true,
-      propagateToInput = true),
-    updateMethod = ADAMMethod(stepSize = 0.001),
-    tokensEncoder = tokensEncoder,
-    tokensEncoderOptimizer = tokensEncoder.model.buildOptimizer(updateMethod = AdaGradMethod(learningRate = 0.1)),
+    model = model,
+    classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
+    tokensEncoderUpdateMethod = AdaGradMethod(learningRate = 0.1),
     onSaveModel = {
       println("Saving re-trained embeddings to '${parsedArgs.trainedEmbeddingsPath}'...")
       embeddingsMap.dump(parsedArgs.trainedEmbeddingsPath, digits = 6)
-    }
+    },
+    useDropout = true
   ).train(
     trainingSet = dataset.training,
     validationSet = dataset.validation,
@@ -100,8 +92,7 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val metrics: List<MetricCounter> =
-    Validator(model = model, tokensEncoderModel = tokensEncoder.model).validate(testSet = dataset.test)
+  val metrics: List<MetricCounter> = Validator(model).validate(testSet = dataset.test)
   val accuracy: Double = metrics.map { it.f1Score }.average()
 
   println("Final accuracy (f1 average): %5.2f %%".format(100 * accuracy))
