@@ -81,11 +81,13 @@ class Validator(model: HANClassifierModel) {
     expectedClasses.forEachIndexed { levelIndex, goldClass ->
 
       val metric: MetricCounter = this.metricsPerLevel[levelIndex]
+      val isNoClass: Boolean =
+        levelIndex in 1..predictions.lastIndex && goldClass == (predictions[levelIndex].length - 1)
 
       when {
         levelIndex > predictions.lastIndex -> metric.falseNeg++
-        this.predictionIsCorrect(predictions[levelIndex], goldClass) -> metric.truePos++
-        levelIndex > 0 && goldClass == (predictions[levelIndex].length - 1) -> metric.falseNeg++
+        this.predictionIsCorrect(predictions[levelIndex], goldClass) -> if (!isNoClass) metric.truePos++
+        isNoClass -> metric.falseNeg++
         else -> metric.falsePos++
       }
     }
