@@ -305,9 +305,9 @@ class Trainer(
 
       this.bestAccuracy = accuracy
 
-      this.classifier.model.dump(FileOutputStream(File(modelFilename)))
+      println("NEW BEST ACCURACY! Saving model to \"$modelFilename\"...")
 
-      println("NEW BEST ACCURACY! Model saved to \"$modelFilename\"")
+      this.classifier.model.dump(FileOutputStream(File(modelFilename)))
     }
   }
 
