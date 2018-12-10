@@ -21,7 +21,6 @@ import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMetho
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
 import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
-import com.kotlinnlp.utils.stats.MetricCounter
 import com.xenomachina.argparser.mainBody
 
 /**
@@ -88,9 +87,12 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val metrics: List<MetricCounter> = Validator(model).validate(testSet = dataset.test)
-  val accuracy: Double = metrics.map { it.f1Score }.average()
+  val info: Validator.ValidationInfo = Validator(model).validate(testSet = dataset.test)
+  val accuracy: Double = info.metrics.map { it.f1Score }.average()
 
   println("Final accuracy (f1 average): %5.2f %%".format(100 * accuracy))
-  metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
+  info.metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
+
+  println("Level 0 confusion:")
+  println(info.confusionMatrix)
 }

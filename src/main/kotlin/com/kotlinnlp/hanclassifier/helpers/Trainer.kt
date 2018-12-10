@@ -22,7 +22,6 @@ import com.kotlinnlp.tokensencoder.TokensEncoderOptimizer
 import com.kotlinnlp.utils.ExamplesIndices
 import com.kotlinnlp.utils.Shuffler
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
-import com.kotlinnlp.utils.stats.MetricCounter
 import java.io.File
 import java.io.FileOutputStream
 
@@ -295,11 +294,14 @@ class Trainer(
    */
   private fun validateAndSaveModel(validationSet: List<Example>, modelFilename: String?) {
 
-    val metrics: List<MetricCounter> = this.validateEpoch(validationSet)
-    val accuracy: Double = metrics.map { it.f1Score }.average()
+    val info: Validator.ValidationInfo = this.validateEpoch(validationSet)
+    val accuracy: Double = info.metrics.map { it.f1Score }.average()
 
     println("Accuracy (f1 average): %5.2f %%".format(100 * accuracy))
-    metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
+    info.metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
+
+    println("Level 0 confusion:")
+    println(info.confusionMatrix)
 
     if (modelFilename != null && accuracy > this.bestAccuracy) {
 
@@ -316,9 +318,9 @@ class Trainer(
    *
    * @param validationSet the validation dataset to validate the [classifier]
    *
-   * @return a list of metric counters, one for each hierarchical level
+   * @return the validation info for the current epoch
    */
-  private fun validateEpoch(validationSet: List<Example>): List<MetricCounter> {
+  private fun validateEpoch(validationSet: List<Example>): Validator.ValidationInfo {
 
     println("Epoch validation on %d sentences".format(validationSet.size))
 

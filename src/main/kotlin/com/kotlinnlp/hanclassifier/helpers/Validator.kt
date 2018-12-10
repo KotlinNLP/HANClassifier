@@ -10,6 +10,7 @@ package com.kotlinnlp.hanclassifier.helpers
 import com.kotlinnlp.hanclassifier.*
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
+import com.kotlinnlp.utils.ConfusionMatrix
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import com.kotlinnlp.utils.stats.MetricCounter
 
@@ -18,7 +19,19 @@ import com.kotlinnlp.utils.stats.MetricCounter
  *
  * @param model the [HANClassifier] model to validate
  */
-class Validator(model: HANClassifierModel) {
+class Validator(private val model: HANClassifierModel) {
+
+  /**
+   * Validation info.
+   *
+   * @property metrics the metric counters per hierarchical level
+   * @property confusionMatrix the confusion matrix of the first hierarchical level
+   */
+  inner class ValidationInfo(
+    val metrics: List<MetricCounter> = List(size = model.classesConfig.depth, init = { MetricCounter() }),
+    val confusionMatrix: ConfusionMatrix = ConfusionMatrix(
+      labels = List(size = model.classesConfig.classes.size, init = { i -> i.toString() }))
+  )
 
   /**
    * The classifier initialized with the model.
@@ -29,9 +42,9 @@ class Validator(model: HANClassifierModel) {
     propagateToInput = false)
 
   /**
-   * The metric counters per hierarchical level.
+   * The info filled during the current validation.
    */
-  private val metricsPerLevel: List<MetricCounter> = List(size = model.classesConfig.depth, init = { MetricCounter() })
+  private lateinit var validationInfo: ValidationInfo
 
   /**
    * When timing started.
@@ -43,14 +56,14 @@ class Validator(model: HANClassifierModel) {
    *
    * @param testSet the test dataset to validate the [classifier]
    *
-   * @return a list of metric counters, one for each hierarchical level
+   * @return the validation info
    */
-  fun validate(testSet: List<Example>): List<MetricCounter> {
+  fun validate(testSet: List<Example>): ValidationInfo {
 
     val progress = ProgressIndicatorBar(testSet.size)
 
     this.startTiming()
-    this.metricsPerLevel.forEach { it.reset() }
+    this.validationInfo = ValidationInfo()
 
     testSet.forEach { example ->
 
@@ -61,7 +74,7 @@ class Validator(model: HANClassifierModel) {
 
     println("Elapsed time: %s".format(this.formatElapsedTime()))
 
-    return this.metricsPerLevel
+    return this.validationInfo
   }
 
   /**
@@ -74,15 +87,18 @@ class Validator(model: HANClassifierModel) {
     val predictions: List<DenseNDArray> = this.classifier.classify(example.sentences)
 
     val expectedClasses: List<Int> = if (this.classifier.model.hasSubLevels(example.goldClasses))
-        example.goldClasses + this.classifier.model.getNoClassIndex(example.goldClasses)
-      else
-        example.goldClasses
+      example.goldClasses + this.classifier.model.getNoClassIndex(example.goldClasses)
+    else
+      example.goldClasses
 
     expectedClasses.forEachIndexed { levelIndex, goldClass ->
 
-      val metric: MetricCounter = this.metricsPerLevel[levelIndex]
+      val metric: MetricCounter = this.validationInfo.metrics[levelIndex]
       val isNoClass: Boolean =
         levelIndex in 1..predictions.lastIndex && goldClass == (predictions[levelIndex].length - 1)
+
+      if (levelIndex == 0)
+        this.validationInfo.confusionMatrix.increment(expected = goldClass, found = predictions[0].argMaxIndex())
 
       when {
         levelIndex > predictions.lastIndex -> metric.falseNeg++
