@@ -68,6 +68,23 @@
                 <version>${assembly-plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>tokenize-assembly</id>
+                        <phase>package</phase>
+                        <goals> <goal>single</goal> </goals>
+                        <configuration>
+                            <finalName>tokenize-classifier-dataset</finalName>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <mainClass>TokenizeCorpusKt</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>training-assembly</id>
                         <phase>package</phase>
                         <goals> <goal>single</goal> </goals>
