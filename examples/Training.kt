@@ -37,7 +37,7 @@ fun main(args: Array<String>) = mainBody {
     EMBDLoader().load(it)
   }
 
-  val embeddingsEncoderModel = EmbeddingsEncoderModel<FormToken, Sentence<FormToken>>(
+  val embeddingsEncoderModel = EmbeddingsEncoderModel(
     embeddingsMap = embeddingsMap,
     embeddingKeyExtractor = NormWordKeyExtractor())
 
