@@ -29,7 +29,7 @@ fun main(args: Array<String>) = mainBody {
     CorpusReader().read(it)
   }
 
-  val model = HANClassifierModel.load(FileInputStream(File(parsedArgs.modelName)))
+  val model = HANClassifierModel.load(FileInputStream(File(parsedArgs.modelPath)))
 
   println("\n-- START VALIDATION ON %d SENTENCES".format(validationSet.size))
 
