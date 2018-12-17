@@ -5,7 +5,7 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
-import helpers.CorpusTokenizer
+package corpus
 
 /**
  * Tokenize a corpus containing plain texts, to use it as dataset for the HAN classifier.

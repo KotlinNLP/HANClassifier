@@ -5,6 +5,8 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
+package training
+
 import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset

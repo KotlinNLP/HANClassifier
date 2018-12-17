@@ -5,7 +5,7 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
-package helpers
+package corpus
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
@@ -21,7 +21,7 @@ import java.io.*
  *
  * @param tokenizerModelFilename the filename of the model of a NeuralTokenizer
  */
-class CorpusTokenizer(tokenizerModelFilename: String) {
+internal class CorpusTokenizer(tokenizerModelFilename: String) {
 
   /**
    * The tokenizer for the texts.
