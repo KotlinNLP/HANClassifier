@@ -36,9 +36,11 @@ fun main(args: Array<String>) = mainBody {
   val info: Validator.ValidationInfo = Validator(model).validate(testSet = validationSet)
   val accuracy: Double = info.metrics.map { it.f1Score }.average()
 
+  println()
   println("Accuracy (f1 average): %5.2f %%".format(100 * accuracy))
   info.metrics.forEachIndexed { i, it -> println("- Level $i: $it") }
 
+  println()
   println("Level 0 confusion:")
   println(info.confusionMatrix)
 }
