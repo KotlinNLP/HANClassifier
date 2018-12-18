@@ -22,6 +22,8 @@ import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
 import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
 import com.xenomachina.argparser.mainBody
+import java.io.File
+import java.io.FileInputStream
 
 /**
  * Train and validate a [HANClassifierModel].
@@ -87,7 +89,8 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val info: Validator.ValidationInfo = Validator(model).validate(testSet = dataset.test)
+  val validationModel = HANClassifierModel.load(FileInputStream(File(parsedArgs.modelName))) // load the best model
+  val info: Validator.ValidationInfo = Validator(validationModel).validate(testSet = dataset.test)
   val accuracy: Double = info.metrics.map { it.f1Score }.average()
 
   println("Final accuracy (f1 average): %5.2f %%".format(100 * accuracy))
