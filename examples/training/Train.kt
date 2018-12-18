@@ -89,7 +89,7 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val validationModel = HANClassifierModel.load(FileInputStream(File(parsedArgs.modelName))) // load the best model
+  val validationModel = HANClassifierModel.load(FileInputStream(File(parsedArgs.modelPath))) // load the best model
   val info: Validator.ValidationInfo = Validator(validationModel).validate(testSet = dataset.test)
   val accuracy: Double = info.metrics.map { it.f1Score }.average()
 
