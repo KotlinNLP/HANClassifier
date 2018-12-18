@@ -24,14 +24,14 @@ fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
 
-  val validationSet: List<Example> = parsedArgs.validationSetPath.let {
-    println("Loading validation dataset from '$it'...")
-    CorpusReader().read(it)
-  }
-
   val model: HANClassifierModel = parsedArgs.modelPath.let {
     println("Loading HAN classifier model from '$it'...")
     HANClassifierModel.load(FileInputStream(File(it)))
+  }
+
+  val validationSet: List<Example> = parsedArgs.validationSetPath.let {
+    println("Loading validation dataset from '$it'...")
+    CorpusReader().read(it)
   }
 
   println("\n-- START VALIDATION ON %d SENTENCES".format(validationSet.size))
