@@ -76,7 +76,7 @@
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>TokenizeCorpusKt</mainClass>
+                                    <mainClass>corpus.TokenizeCorpusKt</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
@@ -89,11 +89,11 @@
                         <phase>package</phase>
                         <goals> <goal>single</goal> </goals>
                         <configuration>
-                            <finalName>classifier-training</finalName>
+                            <finalName>train-classifier</finalName>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>TrainingKt</mainClass>
+                                    <mainClass>training.TrainKt</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
