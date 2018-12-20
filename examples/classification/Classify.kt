@@ -53,13 +53,17 @@ fun main(args: Array<String>) = mainBody {
     val sentences: List<Sentence<FormToken>> = tokenizer.tokenize(inputText).map { it as Sentence<FormToken> }
     val sentencesToUse: List<Sentence<FormToken>> = if (parsedArgs.reduceSentences) reduce(sentences) else sentences
     val predictions: List<DenseNDArray> = classifier.classify(sentencesToUse)
+    val confidencePerLevel: List<Double> = predictions.map { it.max() }
     val predictedClass: String =
       labelsConfig?.getLabel(predictions) ?: predictions.joinToString("-") { it.argMaxIndex().toString() }
+
     var accuracy = 1.0
+    confidencePerLevel.forEach { accuracy *= it }
 
-    predictions.forEach {  accuracy *= it.max() }
-
-    println("Predicted class: '$predictedClass' [confidence: %.1f%%]".format(100.0 * accuracy))
+    println()
+    println("Predicted class: '$predictedClass' (level: ${predictions.size})")
+    println("Global confidence: %.1f%% (%s)"
+      .format(100.0 * accuracy, confidencePerLevel.joinToString(" x ") { "%.1f%%".format(100.0 * it) }))
 
     inputText = readInput()
   }
