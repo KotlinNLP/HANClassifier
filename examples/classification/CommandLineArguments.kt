@@ -41,13 +41,13 @@ internal class CommandLineArguments(args: Array<String>) {
   )
 
   /**
-   * Whether to reduce the size of the sentences to use for the classification.
+   * Reduce the size of the sentences to use for the classification.
    */
   val reduceSentences: Boolean by parser.flagging(
     "-r",
     "--reduce-sentences",
-    help="whether to reduce the size of the sentences to use for the classification (true by default)"
-  ).default { true }
+    help="reduce the size of the sentences to use for the classification"
+  ).default { false }
 
   /**
    * The file path of the labels configuration.
