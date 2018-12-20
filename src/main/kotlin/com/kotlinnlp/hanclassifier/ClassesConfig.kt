@@ -36,7 +36,7 @@ data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) : Serializable {
    *
    * @return true if this classes configuration is complete, otherwise false
    */
-  fun isComplete(): Boolean =
+  internal fun isComplete(): Boolean =
     this.classes.keys.min() == 0 &&
       this.classes.keys.max() == (this.classes.size - 1) &&
       this.classes.values.all { it?.isComplete() ?: true }
@@ -46,7 +46,7 @@ data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) : Serializable {
    *
    * @return true if all this configuration classes and their sub-classes are defined in the other, otherwise false
    */
-  fun isCompatible(other: ClassesConfig): Boolean =
+  internal fun isCompatible(other: ClassesConfig): Boolean =
 
     this.classes.all { (classIndex, subLevel) ->
 
