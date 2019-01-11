@@ -68,11 +68,12 @@ class HANClassifier(
                            levelClassifier: LevelClassifier,
                            levelIndex: Int = 0): List<DenseNDArray> {
 
-    val output: List<DenseNDArray> = listOf(levelClassifier.classifier.forward(input))
-    val predictedClass: Int = output.single().argMaxIndex()
+    val prediction: DenseNDArray = levelClassifier.classifier.forward(input)
+    val predictedClass: Int = prediction.argMaxIndex()
     val subLevelClassifier: HANClassifier.LevelClassifier? = levelClassifier.subLevels[predictedClass]
+    val output: List<DenseNDArray> = listOf(prediction)
 
-    return if (subLevelClassifier != null && (levelIndex == 0 || predictedClass > 0))
+    return if (subLevelClassifier != null && (levelIndex == 0 || predictedClass < prediction.lastIndex))
       output + this.forwardLevel(input = input, levelClassifier = subLevelClassifier, levelIndex = levelIndex + 1)
     else
       output
