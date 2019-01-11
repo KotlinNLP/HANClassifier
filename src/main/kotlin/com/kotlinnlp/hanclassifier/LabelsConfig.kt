@@ -55,9 +55,10 @@ data class LabelsConfig(val labels: List<String>, val subLevels: List<LabelsConf
     var curLevelConfig: LabelsConfig = this
     val indices: List<Int> = classesPrediction.map { it.argMaxIndex() }
 
-    indices.subList(1, indices.size).forEach { classIndex ->
-      curLevelConfig = curLevelConfig.subLevels.getOrNull(classIndex) ?: curLevelConfig
-    }
+    if (indices.size > 1)
+      indices.take(indices.size - 1).forEach { classIndex ->
+        curLevelConfig = curLevelConfig.subLevels[classIndex]!!
+      }
 
     return curLevelConfig.labels[indices.last()]
   }
