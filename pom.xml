@@ -61,9 +61,9 @@
         <spek.version>1.1.5</spek.version>
         <dokka.version>0.9.16</dokka.version>
         <klaxon.version>3.0.5</klaxon.version>
-        <linguisticdescription.version>0.10.0</linguisticdescription.version>
-        <tokensencoder.version>0.4.0</tokensencoder.version>
-        <simplednn.version>0.11.1</simplednn.version>
+        <linguisticdescription.version>0.10.1</linguisticdescription.version>
+        <tokensencoder.version>0.4.1</tokensencoder.version>
+        <simplednn.version>0.11.2</simplednn.version>
         <utils.version>2.1.1</utils.version>
     </properties>
 
