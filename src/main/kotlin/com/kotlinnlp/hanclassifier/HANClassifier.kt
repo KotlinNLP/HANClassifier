@@ -50,10 +50,14 @@ class HANClassifier(
    *
    * @return the list with the probability distribution of the classification, one per hierarchical level
    */
-  fun classify(sentences: List<Sentence<FormToken>>): List<DenseNDArray> =
-    this.forwardLevel(
+  fun classify(sentences: List<Sentence<FormToken>>): List<DenseNDArray> {
+
+    this.tokensEncodersPool.releaseAll()
+
+    return this.forwardLevel(
       input = sentences.map { EncodedSentence(this.tokensEncodersPool.getItem().forward(it)) },
       levelClassifier = this.topLevelClassifier)
+  }
 
   /**
    * Classify the given [input].
