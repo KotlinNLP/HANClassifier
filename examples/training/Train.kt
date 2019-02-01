@@ -34,20 +34,6 @@ fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
 
-  val embeddingsMap: EmbeddingsMapByDictionary = parsedArgs.embeddingsPath.let {
-    println("Loading embeddings from '$it'...")
-    EMBDLoader().load(it)
-  }
-
-  val embeddingsEncoderModel = EmbeddingsEncoderModel(
-    embeddingsMap = embeddingsMap,
-    embeddingKeyExtractor = NormWordKeyExtractor())
-
-  val tokensEncoderModel = ReductionEncoderModel(
-    inputEncoderModel = embeddingsEncoderModel,
-    tokenEncodingSize = 50,
-    activationFunction = Tanh())
-
   val corpusReader = CorpusReader()
   val dataset = Dataset(
     training = parsedArgs.trainingSetPath.let {
@@ -63,9 +49,21 @@ fun main(args: Array<String>) = mainBody {
       corpusReader.read(it)
     })
 
-  dataset.training.forEach { example ->
-    example.sentences.forEach { s -> s.tokens.forEach { embeddingsEncoderModel.embeddingsMap.dictionary.add(it.form) } }
+  val embeddingsMap: EmbeddingsMapByDictionary = parsedArgs.embeddingsPath.let {
+    println("Loading embeddings from '$it'...")
+    EMBDLoader().load(it)
   }
+
+  dataset.training.forEach { example ->
+    example.sentences.forEach { s -> s.tokens.forEach { embeddingsMap.dictionary.add(it.form) } }
+  }
+
+  val tokensEncoderModel = ReductionEncoderModel(
+    inputEncoderModel = EmbeddingsEncoderModel(
+      embeddingsMap = embeddingsMap,
+      embeddingKeyExtractor = NormWordKeyExtractor()),
+    tokenEncodingSize = 50,
+    activationFunction = Tanh())
 
   val model = HANClassifierModel(
     name = parsedArgs.modelName,
