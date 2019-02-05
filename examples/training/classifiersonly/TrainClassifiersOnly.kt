@@ -16,11 +16,9 @@ import com.kotlinnlp.hanclassifier.helpers.Validator
 import com.kotlinnlp.tokensencoder.embeddings.keyextractor.NormWordKeyExtractor
 import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
 import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMapByDictionary
-import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
-import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
 import com.xenomachina.argparser.mainBody
 import training.CommandLineArguments
 import java.io.File
@@ -60,12 +58,9 @@ fun main(args: Array<String>) = mainBody {
     example.sentences.forEach { s -> s.tokens.forEach { embeddingsMap.dictionary.add(it.form) } }
   }
 
-  val tokensEncoderModel = ReductionEncoderModel(
-    inputEncoderModel = EmbeddingsEncoderModel(
-      embeddingsMap = embeddingsMap,
-      embeddingKeyExtractor = NormWordKeyExtractor()),
-    tokenEncodingSize = 50,
-    activationFunction = Tanh())
+  val tokensEncoderModel = EmbeddingsEncoderModel(
+    embeddingsMap = embeddingsMap,
+    embeddingKeyExtractor = NormWordKeyExtractor())
 
   val model = HANClassifierModel(
     name = parsedArgs.modelName,
