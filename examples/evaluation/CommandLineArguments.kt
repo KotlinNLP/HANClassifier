@@ -22,12 +22,12 @@ internal class CommandLineArguments(args: Array<String>) {
   private val parser = ArgParser(args)
 
   /**
-   * The file path in which to serialize the model.
+   * The file path of the serialized model.
    */
   val modelPath: String by parser.storing(
     "-m",
     "--model-path",
-    help="the file path in which to serialize the model"
+    help="the file path of the serialized model"
   )
 
   /**
