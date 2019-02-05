@@ -19,11 +19,11 @@ import java.io.Serializable
 /**
  * The [HANClassifier] model.
  *
- * @property multiLevelHANModel the model of a multi-level HAN structure
+ * @property multiLevelHAN the model of a multi-level HAN structure
  * @property tokensEncoder the model of a tokens encoder to encode the input
  */
 class HANClassifierModel(
-  val multiLevelHANModel: MultiLevelHANModel,
+  val multiLevelHAN: MultiLevelHANModel,
   val tokensEncoder: TokensEncoderModel<FormToken, Sentence<FormToken>>
 ) : Serializable {
 
@@ -49,7 +49,7 @@ class HANClassifierModel(
                         tokensEncoder: TokensEncoderModel<FormToken, Sentence<FormToken>>,
                         attentionSize: Int = 20,
                         recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU) = HANClassifierModel(
-      multiLevelHANModel = MultiLevelHANModel(
+      multiLevelHAN = MultiLevelHANModel(
         name = name,
         classesConfig = classesConfig,
         tokenEncodingSize = tokensEncoder.tokenEncodingSize,
@@ -72,23 +72,23 @@ class HANClassifierModel(
   /**
    * The name of the model.
    */
-  val name: String = this.multiLevelHANModel.name
+  val name: String = this.multiLevelHAN.name
 
   /**
    * The configurations of the hierarchy of classes that can be predicted.
    */
-  val classesConfig: ClassesConfig = this.multiLevelHANModel.classesConfig
+  val classesConfig: ClassesConfig = this.multiLevelHAN.classesConfig
 
   /**
    * The classifiers models by level.
    */
-  internal val topLevelModel: MultiLevelHANModel.LevelModel = this.multiLevelHANModel.topLevelModel
+  internal val topLevelModel: MultiLevelHANModel.LevelModel = this.multiLevelHAN.topLevelModel
 
   /**
    * Check requirements.
    */
   init {
-    require(this.multiLevelHANModel.tokenEncodingSize == this.tokensEncoder.tokenEncodingSize) {
+    require(this.multiLevelHAN.tokenEncodingSize == this.tokensEncoder.tokenEncodingSize) {
       "The tokens encoding size of the TokensEncoder must be compatible with the MultiLevelHANModel."
     }
   }
