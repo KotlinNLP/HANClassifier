@@ -34,12 +34,14 @@ import java.io.FileOutputStream
  *                                  trained)
  * @param classifierUpdateMethod the update method for the parameters of the HAN classifier
  * @param useDropout whether to apply the dropout of the input
+ * @param saveClassifiersOnly whether to serialize and save only the multi-level HAN classifiers
  */
 class Trainer(
   private val model: HANClassifierModel,
   tokensEncoderUpdateMethod: UpdateMethod<*>? = null,
   private val classifierUpdateMethod: UpdateMethod<*>,
-  useDropout: Boolean
+  useDropout: Boolean,
+  private val saveClassifiersOnly: Boolean = false
 ) {
 
   /**
@@ -310,7 +312,10 @@ class Trainer(
 
       println("NEW BEST ACCURACY! Saving model to \"$modelFilename\"...")
 
-      this.classifier.model.dump(FileOutputStream(File(modelFilename)))
+      if (this.saveClassifiersOnly)
+        this.classifier.model.multiLevelHAN.dump(FileOutputStream(File(modelFilename)))
+      else
+        this.classifier.model.dump(FileOutputStream(File(modelFilename)))
     }
   }
 
