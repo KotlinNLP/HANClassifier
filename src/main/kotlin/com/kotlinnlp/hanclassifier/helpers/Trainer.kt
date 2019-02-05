@@ -10,6 +10,7 @@ package com.kotlinnlp.hanclassifier.helpers
 import com.kotlinnlp.hanclassifier.EncodedSentence
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.HANClassifierModel
+import com.kotlinnlp.hanclassifier.MultiLevelHANModel
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
@@ -133,7 +134,7 @@ class Trainer(
    *
    * @return a level optimizer
    */
-  private fun buildLevelOptimizer(levelModel: HANClassifierModel.LevelModel): LevelOptimizer {
+  private fun buildLevelOptimizer(levelModel: MultiLevelHANModel.LevelModel): LevelOptimizer {
 
     val levelOptimizer = LevelOptimizer(
       optimizer = ParamsOptimizer(params = levelModel.han.params, updateMethod = this.classifierUpdateMethod),

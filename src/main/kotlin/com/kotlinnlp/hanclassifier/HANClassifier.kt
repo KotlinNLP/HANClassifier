@@ -88,7 +88,7 @@ class HANClassifier(
    *
    * @return a level classifier based on the given model
    */
-  private fun buildLevelClassifier(levelModel: HANClassifierModel.LevelModel): LevelClassifier =
+  private fun buildLevelClassifier(levelModel: MultiLevelHANModel.LevelModel): LevelClassifier =
     LevelClassifier(
       classifier = HANClassifierSingle(
         han = levelModel.han,
