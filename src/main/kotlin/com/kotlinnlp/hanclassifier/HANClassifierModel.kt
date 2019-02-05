@@ -9,10 +9,7 @@ package com.kotlinnlp.hanclassifier
 
 import com.kotlinnlp.linguisticdescription.sentence.Sentence
 import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
-import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
-import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.simplednn.deeplearning.attention.han.HAN
 import com.kotlinnlp.tokensencoder.TokensEncoderModel
 import com.kotlinnlp.utils.Serializer
 import java.io.InputStream
@@ -22,18 +19,12 @@ import java.io.Serializable
 /**
  * The [HANClassifier] model.
  *
- * @property name the name of the model
- * @property classesConfig the configurations of the hierarchy of classes that can be predicted
- * @param tokensEncoder the model of a tokens encoder to encode the input
- * @param attentionSize the size of the attention arrays (default = 20)
- * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
+ * @property multiLevelHANModel the model of a multi-level HAN structure
+ * @property tokensEncoder the model of a tokens encoder to encode the input
  */
 class HANClassifierModel(
-  val name: String,
-  val classesConfig: ClassesConfig,
-  val tokensEncoder: TokensEncoderModel<FormToken, Sentence<FormToken>>,
-  private val attentionSize: Int = 20,
-  private val recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU
+  val multiLevelHANModel: MultiLevelHANModel,
+  val tokensEncoder: TokensEncoderModel<FormToken, Sentence<FormToken>>
 ) : Serializable {
 
   companion object {
@@ -43,6 +34,30 @@ class HANClassifierModel(
      */
     @Suppress("unused")
     private const val serialVersionUID: Long = 1L
+
+    /**
+     * Build a [HANClassifierModel] without an explicit declaration of the [MultiLevelHANModel].
+     *
+     * @param name the name of the model
+     * @param classesConfig the configurations of the hierarchy of classes that can be predicted
+     * @param tokensEncoder the model of a tokens encoder to encode the input
+     * @param attentionSize the size of the attention arrays (default = 20)
+     * @param recurrentConnectionType the recurrent connection type of the recurrent neural networks
+     */
+    operator fun invoke(name: String,
+                        classesConfig: ClassesConfig,
+                        tokensEncoder: TokensEncoderModel<FormToken, Sentence<FormToken>>,
+                        attentionSize: Int = 20,
+                        recurrentConnectionType: LayerType.Connection = LayerType.Connection.GRU) = HANClassifierModel(
+      multiLevelHANModel = MultiLevelHANModel(
+        name = name,
+        classesConfig = classesConfig,
+        tokenEncodingSize = tokensEncoder.tokenEncodingSize,
+        attentionSize = attentionSize,
+        recurrentConnectionType = recurrentConnectionType
+      ),
+      tokensEncoder = tokensEncoder
+    )
 
     /**
      * Read a [HANClassifierModel] (serialized) from an input stream and decode it.
@@ -55,27 +70,28 @@ class HANClassifierModel(
   }
 
   /**
-   * The model of a hierarchical level.
-   *
-   * @property han a hierarchical attention network to classify a level
-   * @property subLevels the map of hierarchical sub-levels models associated by class index (null if there is none)
+   * The name of the model.
    */
-  internal data class LevelModel(val han: HAN, val subLevels: Map<Int, LevelModel?>) : Serializable {
+  val name: String = this.multiLevelHANModel.name
 
-    companion object {
-
-      /**
-       * Private val used to serialize the class (needed by Serializable).
-       */
-      @Suppress("unused")
-      private const val serialVersionUID: Long = 1L
-    }
-  }
+  /**
+   * The configurations of the hierarchy of classes that can be predicted.
+   */
+  val classesConfig: ClassesConfig = this.multiLevelHANModel.classesConfig
 
   /**
    * The classifiers models by level.
    */
-  internal val topLevelModel: LevelModel = this.buildLevelModel(classesConfig)
+  internal val topLevelModel: MultiLevelHANModel.LevelModel = this.multiLevelHANModel.topLevelModel
+
+  /**
+   * Check requirements.
+   */
+  init {
+    require(this.multiLevelHANModel.tokenEncodingSize == this.tokensEncoder.tokenEncodingSize) {
+      "The tokens encoding size of the TokensEncoder must be compatible with the MultiLevelHANModel."
+    }
+  }
 
   /**
    * Serialize this [HANClassifierModel] and write it to an output stream.
@@ -111,24 +127,4 @@ class HANClassifierModel(
 
     return classConfig.classes.size
   }
-
-  /**
-   * @param config the configuration of classes of a given hierarchical level
-   * @param level the hierarchical level (0 means the top)
-   *
-   * @return a hierarchical level model
-   */
-  private fun buildLevelModel(config: ClassesConfig, level: Int = 0): LevelModel = LevelModel(
-    han = HAN(
-      hierarchySize = 2,
-      inputSize = this.tokensEncoder.tokenEncodingSize,
-      inputType = LayerType.Input.Dense,
-      biRNNsActivation = Tanh(),
-      biRNNsConnectionType = this.recurrentConnectionType,
-      attentionSize = this.attentionSize,
-      outputSize = config.classes.size + (if (level > 0) 1 else 0), // include the 'no-class' for lower levels
-      outputActivation = Softmax()),
-    subLevels = config.classes.entries
-      .associate { it.key to it.value?.let { config -> this.buildLevelModel(config = config, level = level + 1) } }
-  )
 }
