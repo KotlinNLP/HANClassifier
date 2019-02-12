@@ -8,13 +8,13 @@
 package evaluation.separatemodels
 
 import com.kotlinnlp.hanclassifier.HANClassifierModel
-import com.kotlinnlp.hanclassifier.MultiLevelHANModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.hanclassifier.helpers.Validator
 import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMapByDictionary
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
-import com.kotlinnlp.tokensencoder.embeddings.keyextractor.NormWordKeyExtractor
+import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
 import com.xenomachina.argparser.mainBody
 import java.io.File
 import java.io.FileInputStream
@@ -28,24 +28,26 @@ fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
 
-  val classifiersModel: MultiLevelHANModel = parsedArgs.classifiersModelPath.let {
-    println("Loading multi-level classifiers model from '$it'...")
-    MultiLevelHANModel.load(FileInputStream(File(it)))
+  val model: HANClassifierModel = parsedArgs.classifiersModelPath.let {
+    println("Loading HAN classifier model from '$it'...")
+    HANClassifierModel.load(FileInputStream(File(it)))
   }
-  val tokensEncoderModel = EmbeddingsEncoderModel.Transient(
-    embeddingsMap = parsedArgs.embeddingsPath.let {
-      println("Loading embeddings from '$it'...")
-      EMBDLoader().load(it)
-    },
-    embeddingKeyExtractor = NormWordKeyExtractor())
+  val embeddingsMap: EmbeddingsMapByDictionary = parsedArgs.embeddingsPath.let {
+    println("Loading embeddings from '$it'...")
+    EMBDLoader().load(it)
+  }
   val validationSet: List<Example> = parsedArgs.validationSetPath.let {
     println("Loading validation dataset from '$it'...")
     CorpusReader().read(it)
   }
 
+  val inputTokensEncoder: EmbeddingsEncoderModel.Transient<*, *> =
+    (model.tokensEncoder as ReductionEncoderModel).inputEncoderModel as EmbeddingsEncoderModel.Transient
+
+  inputTokensEncoder.setEmbeddingsMap(embeddingsMap)
+
   println("\n-- START VALIDATION ON %d SENTENCES".format(validationSet.size))
 
-  val model = HANClassifierModel(multiLevelHAN = classifiersModel, tokensEncoder = tokensEncoderModel)
   val info: Validator.ValidationInfo = Validator(model).validate(testSet = validationSet)
   val accuracy: Double = info.metrics.map { it.f1Score }.average()
 
