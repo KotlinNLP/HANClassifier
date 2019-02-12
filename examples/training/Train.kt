@@ -8,6 +8,7 @@
 package training
 
 import com.kotlinnlp.hanclassifier.HANClassifierModel
+import com.kotlinnlp.hanclassifier.MultiLevelHANModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.Trainer
@@ -59,9 +60,10 @@ fun main(args: Array<String>) = mainBody {
   }
 
   val tokensEncoderModel = ReductionEncoderModel(
-    inputEncoderModel = EmbeddingsEncoderModel.Base(
-      embeddingsMap = embeddingsMap,
-      embeddingKeyExtractor = NormWordKeyExtractor()),
+    inputEncoderModel = if (parsedArgs.noEmbeddingsOptimization)
+      EmbeddingsEncoderModel.Transient(embeddingsMap = embeddingsMap, embeddingKeyExtractor = NormWordKeyExtractor())
+    else
+      EmbeddingsEncoderModel.Base(embeddingsMap = embeddingsMap, embeddingKeyExtractor = NormWordKeyExtractor()),
     tokenEncodingSize = 50,
     activationFunction = Tanh())
 
@@ -87,7 +89,14 @@ fun main(args: Array<String>) = mainBody {
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
-  val validationModel = HANClassifierModel.load(FileInputStream(File(parsedArgs.modelPath))) // load the best model
+  // Load the best model.
+  val validationModel = if (parsedArgs.noEmbeddingsOptimization)
+    HANClassifierModel(
+      multiLevelHAN = MultiLevelHANModel.load(FileInputStream(File(parsedArgs.modelPath))),
+      tokensEncoder = tokensEncoderModel)
+  else
+    HANClassifierModel.load(FileInputStream(File(parsedArgs.modelPath)))
+
   val info: Validator.ValidationInfo = Validator(validationModel).validate(testSet = dataset.test)
   val accuracy: Double = info.metrics.map { it.f1Score }.average()
 

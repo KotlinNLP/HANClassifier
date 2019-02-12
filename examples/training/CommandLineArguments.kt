@@ -76,6 +76,14 @@ internal class CommandLineArguments(args: Array<String>) {
   )
 
   /**
+   * Do not optimize nor serialized the embeddings.
+   */
+  val noEmbeddingsOptimization: Boolean by parser.flagging(
+    "--no-embeddings-optimization",
+    help = "do not optimize nor serialized the embeddings"
+  )
+
+  /**
    * Force parsing all arguments (only read ones are parsed by default).
    */
   init {
