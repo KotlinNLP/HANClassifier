@@ -102,23 +102,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>training-classifiers-assembly</id>
-                        <phase>package</phase>
-                        <goals> <goal>single</goal> </goals>
-                        <configuration>
-                            <finalName>train-classifiers-only</finalName>
-                            <archive>
-                                <manifest>
-                                    <addClasspath>true</addClasspath>
-                                    <mainClass>training.classifiersonly.TrainClassifiersOnlyKt</mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>evaluation-assembly</id>
                         <phase>package</phase>
                         <goals> <goal>single</goal> </goals>
