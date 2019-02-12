@@ -58,7 +58,7 @@ fun main(args: Array<String>) = mainBody {
     example.sentences.forEach { s -> s.tokens.forEach { embeddingsMap.dictionary.add(it.form) } }
   }
 
-  val tokensEncoderModel = EmbeddingsEncoderModel(
+  val tokensEncoderModel = EmbeddingsEncoderModel.Transient(
     embeddingsMap = embeddingsMap,
     embeddingKeyExtractor = NormWordKeyExtractor())
 

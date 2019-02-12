@@ -32,7 +32,7 @@ fun main(args: Array<String>) = mainBody {
     println("Loading multi-level classifiers model from '$it'...")
     MultiLevelHANModel.load(FileInputStream(File(it)))
   }
-  val tokensEncoderModel = EmbeddingsEncoderModel(
+  val tokensEncoderModel = EmbeddingsEncoderModel.Transient(
     embeddingsMap = parsedArgs.embeddingsPath.let {
       println("Loading embeddings from '$it'...")
       EMBDLoader().load(it)

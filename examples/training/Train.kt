@@ -59,7 +59,7 @@ fun main(args: Array<String>) = mainBody {
   }
 
   val tokensEncoderModel = ReductionEncoderModel(
-    inputEncoderModel = EmbeddingsEncoderModel(
+    inputEncoderModel = EmbeddingsEncoderModel.Base(
       embeddingsMap = embeddingsMap,
       embeddingKeyExtractor = NormWordKeyExtractor()),
     tokenEncodingSize = 50,
