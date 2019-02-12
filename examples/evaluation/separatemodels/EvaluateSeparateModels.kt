@@ -20,7 +20,7 @@ import java.io.File
 import java.io.FileInputStream
 
 /**
- * Evaluate a [HANClassifierModel] loading the multi-level classifiers model and the embeddings separately.
+ * Evaluate a [HANClassifierModel] with a transient embeddings encoder, loading the embeddings separately.
  *
  * Launch with the '-h' option for help about the command line arguments.
  */
