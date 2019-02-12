@@ -8,7 +8,6 @@
 package training
 
 import com.kotlinnlp.hanclassifier.HANClassifierModel
-import com.kotlinnlp.hanclassifier.MultiLevelHANModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.Trainer
@@ -90,12 +89,15 @@ fun main(args: Array<String>) = mainBody {
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
 
   // Load the best model.
-  val validationModel = if (parsedArgs.noEmbeddingsOptimization)
-    HANClassifierModel(
-      multiLevelHAN = MultiLevelHANModel.load(FileInputStream(File(parsedArgs.modelPath))),
-      tokensEncoder = tokensEncoderModel)
-  else
-    HANClassifierModel.load(FileInputStream(File(parsedArgs.modelPath)))
+  val validationModel = HANClassifierModel.load(FileInputStream(File(parsedArgs.modelPath)))
+
+  if (parsedArgs.noEmbeddingsOptimization) {
+
+    val inputTokensEncoder: EmbeddingsEncoderModel.Transient<*, *> =
+      (validationModel.tokensEncoder as ReductionEncoderModel).inputEncoderModel as EmbeddingsEncoderModel.Transient
+
+    inputTokensEncoder.setEmbeddingsMap(embeddingsMap)
+  }
 
   val info: Validator.ValidationInfo = Validator(validationModel).validate(testSet = dataset.test)
   val accuracy: Double = info.metrics.map { it.f1Score }.average()
