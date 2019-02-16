@@ -33,7 +33,7 @@ import java.io.FileInputStream
 fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
-  val optimizeEmbeddings: Boolean = parsedArgs.noEmbeddingsOptimization
+  val optimizeEmbeddings: Boolean = !parsedArgs.noEmbeddingsOptimization
 
   val corpusReader = CorpusReader()
   val dataset = Dataset(
