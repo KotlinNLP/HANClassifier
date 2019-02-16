@@ -33,6 +33,7 @@ import java.io.FileInputStream
 fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
+  val optimizeEmbeddings: Boolean = parsedArgs.noEmbeddingsOptimization
 
   val corpusReader = CorpusReader()
   val dataset = Dataset(
@@ -54,8 +55,10 @@ fun main(args: Array<String>) = mainBody {
     EMBDLoader().load(it)
   }
 
-  dataset.training.forEach { example ->
-    example.sentences.forEach { s -> s.tokens.forEach { embeddingsMap.dictionary.add(it.form) } }
+  if (optimizeEmbeddings) {
+    dataset.training.forEach { example ->
+      example.sentences.forEach { s -> s.tokens.forEach { embeddingsMap.dictionary.add(it.form) } }
+    }
   }
 
   val tokensEncoderModel = ReductionEncoderModel(
@@ -63,6 +66,7 @@ fun main(args: Array<String>) = mainBody {
       EmbeddingsEncoderModel.Transient(embeddingsMap = embeddingsMap, embeddingKeyExtractor = NormWordKeyExtractor())
     else
       EmbeddingsEncoderModel.Base(embeddingsMap = embeddingsMap, embeddingKeyExtractor = NormWordKeyExtractor()),
+    optimizeInput = optimizeEmbeddings,
     tokenEncodingSize = 50,
     activationFunction = Tanh())
 
