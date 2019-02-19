@@ -48,7 +48,8 @@ fun main(args: Array<String>) = mainBody {
     test = parsedArgs.testSetPath.let {
       println("Loading test dataset from '$it'...")
       corpusReader.read(it)
-    })
+    },
+    autoComplete = parsedArgs.autoComplete)
 
   val embeddingsMap: EmbeddingsMapByDictionary = parsedArgs.embeddingsPath.let {
     println("Loading embeddings from '$it'...")

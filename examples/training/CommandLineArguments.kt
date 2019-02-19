@@ -84,6 +84,15 @@ internal class CommandLineArguments(args: Array<String>) {
   )
 
   /**
+   * Auto-complete the training dataset with the missing classes.
+   */
+  val autoComplete: Boolean by parser.flagging(
+    "-a",
+    "--auto-complete",
+    help = "auto-complete the training dataset with the missing classes"
+  )
+
+  /**
    * Force parsing all arguments (only read ones are parsed by default).
    */
   init {
