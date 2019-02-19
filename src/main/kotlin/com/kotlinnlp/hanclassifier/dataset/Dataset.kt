@@ -15,8 +15,15 @@ import com.kotlinnlp.hanclassifier.ClassesConfig
  * @property training the training set as list of examples
  * @property validation the validation set as list of examples
  * @property test the test set as list of examples
+ * @param autoComplete whether to autocomplete the classes configuration of the training set in case the examples do not
+ *                     cover all the possible classes
  */
-data class Dataset(val training: List<Example>, val validation: List<Example>, val test: List<Example>) {
+class Dataset(
+  val training: List<Example>,
+  val validation: List<Example>,
+  val test: List<Example>,
+  autoComplete: Boolean = false
+) {
 
   /**
    * A mutable classes configuration.
@@ -28,10 +35,16 @@ data class Dataset(val training: List<Example>, val validation: List<Example>, v
     /**
      * Convert this mutable configuration to a classes configuration.
      *
+     * @param autoComplete whether to autocomplete the classes configuration in case of missing levels
+     *
      * @return a classes configuration
      */
-    fun toClassesConfig(): ClassesConfig? = if (this.levels.isNotEmpty())
-      ClassesConfig(classes = this.levels.mapValues { it.value.toClassesConfig() })
+    fun toClassesConfig(autoComplete: Boolean): ClassesConfig? = if (this.levels.isNotEmpty())
+      ClassesConfig(
+        classes = if (autoComplete)
+          (0 .. this.levels.keys.max()!!).associate { it to this.levels[it]?.toClassesConfig(autoComplete = true) }
+        else
+          this.levels.mapValues { it.value.toClassesConfig(autoComplete = false) })
     else
       null
   }
@@ -39,7 +52,7 @@ data class Dataset(val training: List<Example>, val validation: List<Example>, v
   /**
    * The hierarchical configuration of the classes defined in the dataset.
    */
-  val classesConfig: ClassesConfig = this.getClassesConfig(this.training)
+  val classesConfig: ClassesConfig = this.getClassesConfig(this.training, autoComplete = autoComplete)
 
   /**
    * Check the validity and the compatibility of the dataset.
@@ -48,21 +61,23 @@ data class Dataset(val training: List<Example>, val validation: List<Example>, v
 
     require(this.classesConfig.isComplete()) { "The training dataset must contain all the possible classes." }
 
-    require(this.getClassesConfig(this.validation).isCompatible(this.classesConfig)) {
+    require(this.getClassesConfig(this.validation, autoComplete = false).isCompatible(this.classesConfig)) {
       "The classes defined in the validation dataset must be compatible with the training set."
     }
 
-    require(this.getClassesConfig(this.test).isCompatible(this.classesConfig)) {
+    require(this.getClassesConfig(this.test, autoComplete = false).isCompatible(this.classesConfig)) {
       "The classes defined in the test dataset must be compatible with the training set."
     }
   }
 
   /**
    * @param examples a list of examples
+   * @param autoComplete whether to autocomplete the classes configuration in case the examples do not cover all the
+   *                     possible classes
    *
    * @return the sets of classes of the given examples, in a hierarchical configuration
    */
-  private fun getClassesConfig(examples: List<Example>): ClassesConfig {
+  private fun getClassesConfig(examples: List<Example>, autoComplete: Boolean): ClassesConfig {
 
     val mutableConfig = MutableClassesConfig()
 
@@ -73,6 +88,6 @@ data class Dataset(val training: List<Example>, val validation: List<Example>, v
       example.goldClasses.forEach { curConfig = curConfig.levels.getOrPut(it) { MutableClassesConfig() } }
     }
 
-    return mutableConfig.toClassesConfig()!!
+    return mutableConfig.toClassesConfig(autoComplete)!!
   }
 }
