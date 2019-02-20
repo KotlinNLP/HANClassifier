@@ -8,6 +8,7 @@
 package training
 
 import com.xenomachina.argparser.ArgParser
+import com.xenomachina.argparser.default
 
 /**
  * The interpreter of command line arguments.
@@ -20,6 +21,15 @@ internal class CommandLineArguments(args: Array<String>) {
    * The parser of the string arguments.
    */
   private val parser = ArgParser(args)
+
+  /**
+   * The number of training epochs (default = 5).
+   */
+  val epochs: Int by parser.storing(
+    "-p",
+    "--epochs",
+    help="the number of training epochs (default = 5)"
+  ) { toInt() }.default(5)
 
   /**
    * The name of the model.

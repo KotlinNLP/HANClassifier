@@ -88,7 +88,7 @@ fun main(args: Array<String>) = mainBody {
   ).train(
     trainingSet = dataset.training,
     validationSet = dataset.validation,
-    epochs = 10,
+    epochs = parsedArgs.epochs,
     modelFilename = parsedArgs.modelPath)
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(dataset.test.size))
