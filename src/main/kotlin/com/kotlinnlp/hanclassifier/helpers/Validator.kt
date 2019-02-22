@@ -11,6 +11,7 @@ import com.kotlinnlp.hanclassifier.*
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.utils.ConfusionMatrix
+import com.kotlinnlp.utils.progressindicator.ProgressIndicator
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import com.kotlinnlp.utils.stats.MetricCounter
 
@@ -18,8 +19,9 @@ import com.kotlinnlp.utils.stats.MetricCounter
  * A helper for the validation of a [HANClassifier].
  *
  * @param model the [HANClassifier] model to validate
+ * @param verbose whether to print progress information (default = true)
  */
-class Validator(private val model: HANClassifierModel) {
+class Validator(private val model: HANClassifierModel, private val verbose: Boolean = true) {
 
   /**
    * Validation info.
@@ -60,19 +62,19 @@ class Validator(private val model: HANClassifierModel) {
    */
   fun validate(testSet: List<Example>): ValidationInfo {
 
-    val progress = ProgressIndicatorBar(testSet.size)
+    val progress: ProgressIndicator? = if (this.verbose) ProgressIndicatorBar(testSet.size) else null
 
     this.startTiming()
     this.validationInfo = ValidationInfo()
 
     testSet.forEach { example ->
 
-      progress.tick()
+      progress?.tick()
 
       this.validateExample(example)
     }
 
-    println("Elapsed time: %s".format(this.formatElapsedTime()))
+    if (this.verbose) println("Elapsed time: %s".format(this.formatElapsedTime()))
 
     return this.validationInfo
   }
