@@ -12,9 +12,10 @@ import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Dataset
 import com.kotlinnlp.hanclassifier.helpers.Trainer
 import com.kotlinnlp.hanclassifier.helpers.Validator
+import com.kotlinnlp.linguisticdescription.sentence.Sentence
+import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.tokensencoder.embeddings.keyextractor.NormWordKeyExtractor
-import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
-import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMapByDictionary
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
@@ -51,16 +52,12 @@ fun main(args: Array<String>) = mainBody {
     },
     autoComplete = parsedArgs.autoComplete)
 
-  val embeddingsMap: EmbeddingsMapByDictionary = parsedArgs.embeddingsPath.let {
-    println("Loading embeddings from '$it'...")
-    EMBDLoader().load(it)
+  val embeddingsMap: EmbeddingsMap<String> = parsedArgs.embeddingsPath.let {
+    println("Loading pre-trained word embeddings from '$it'...")
+    EmbeddingsMap.load(it)
   }
 
-  if (optimizeEmbeddings) {
-    dataset.training.forEach { example ->
-      example.sentences.forEach { s -> s.tokens.forEach { embeddingsMap.dictionary.add(it.form) } }
-    }
-  }
+  if (optimizeEmbeddings) embeddingsMap.addAll(dataset.training.flatMap { it.sentences } )
 
   val tokensEncoderModel = ReductionEncoderModel(
     inputEncoderModel = if (parsedArgs.noEmbeddingsOptimization)
@@ -112,4 +109,19 @@ fun main(args: Array<String>) = mainBody {
 
   println("Level 0 confusion:")
   println(info.confusionMatrix)
+}
+
+/**
+ * Add the all the tokens form to the embeddings map.
+ *
+ * @param sentences the list of sentences
+ */
+fun EmbeddingsMap<String>.addAll(sentences: List<Sentence<FormToken>>) {
+
+  sentences.forEach { sentence ->
+    sentence.tokens.forEach { token ->
+      if (token.normalizedForm !in this)
+        this.set(token.normalizedForm) // random initialized
+    }
+  }
 }

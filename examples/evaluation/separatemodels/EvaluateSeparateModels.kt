@@ -11,8 +11,7 @@ import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.dataset.CorpusReader
 import com.kotlinnlp.hanclassifier.dataset.Example
 import com.kotlinnlp.hanclassifier.helpers.Validator
-import com.kotlinnlp.simplednn.core.embeddings.EMBDLoader
-import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMapByDictionary
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
 import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
 import com.xenomachina.argparser.mainBody
@@ -32,10 +31,12 @@ fun main(args: Array<String>) = mainBody {
     println("Loading HAN classifier model from '$it'...")
     HANClassifierModel.load(FileInputStream(File(it)))
   }
-  val embeddingsMap: EmbeddingsMapByDictionary = parsedArgs.embeddingsPath.let {
-    println("Loading embeddings from '$it'...")
-    EMBDLoader().load(it)
+
+  val embeddingsMap: EmbeddingsMap<String> = parsedArgs.embeddingsPath.let {
+    println("Loading pre-trained word embeddings from '$it'...")
+    EmbeddingsMap.load(it)
   }
+
   val validationSet: List<Example> = parsedArgs.validationSetPath.let {
     println("Loading validation dataset from '$it'...")
     CorpusReader().read(it)
