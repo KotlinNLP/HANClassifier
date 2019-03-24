@@ -17,9 +17,7 @@ import com.kotlinnlp.linguisticdescription.sentence.token.FormToken
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
-import com.kotlinnlp.simplednn.deeplearning.attention.han.HANParameters
 import com.kotlinnlp.tokensencoder.TokensEncoder
-import com.kotlinnlp.tokensencoder.TokensEncoderOptimizer
 import com.kotlinnlp.utils.ExamplesIndices
 import com.kotlinnlp.utils.Shuffler
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
@@ -48,7 +46,7 @@ class Trainer(
    * The optimizer of a level classifier of the hierarchy.
    */
   private data class LevelOptimizer(
-    val optimizer: ParamsOptimizer<HANParameters>,
+    val optimizer: ParamsOptimizer,
     val subLevels: Map<Int, LevelOptimizer?>
   )
 
@@ -81,14 +79,13 @@ class Trainer(
    * The optimizer of the tokens encoder.
    * It is null if it must not be trained.
    */
-  private val tokensEncoderOptimizer: TokensEncoderOptimizer? =
-    tokensEncoderUpdateMethod?.let { model.tokensEncoder.buildOptimizer(updateMethod = it) }
+  private val tokensEncoderOptimizer: ParamsOptimizer? = tokensEncoderUpdateMethod?.let { ParamsOptimizer(it) }
 
   /**
    * The list of all the HAN optimizers of all the levels.
    * It is filled calling the [buildLevelOptimizer] method.
    */
-  private val classifierOptimizers: MutableList<ParamsOptimizer<HANParameters>> = mutableListOf()
+  private val classifierOptimizers: MutableList<ParamsOptimizer> = mutableListOf()
 
   /**
    * The optimizer of the parameters of the top level encoder of the [classifier].
@@ -139,7 +136,7 @@ class Trainer(
   private fun buildLevelOptimizer(levelModel: MultiLevelHANModel.LevelModel): LevelOptimizer {
 
     val levelOptimizer = LevelOptimizer(
-      optimizer = ParamsOptimizer(params = levelModel.han.params, updateMethod = this.classifierUpdateMethod),
+      optimizer = ParamsOptimizer(this.classifierUpdateMethod),
       subLevels = levelModel.subLevels.mapValues { it.value?.let { model -> this.buildLevelOptimizer(model) } })
 
     this.classifierOptimizers.add(levelOptimizer.optimizer)

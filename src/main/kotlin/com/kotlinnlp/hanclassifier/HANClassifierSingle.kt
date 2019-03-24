@@ -8,6 +8,7 @@
 package com.kotlinnlp.hanclassifier
 
 import com.kotlinnlp.simplednn.core.neuralprocessor.NeuralProcessor
+import com.kotlinnlp.simplednn.core.optimizer.ParamsErrorsList
 import com.kotlinnlp.simplednn.deeplearning.attention.han.*
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 
@@ -27,8 +28,7 @@ internal class HANClassifierSingle(
   List<EncodedSentence>, // InputType
   DenseNDArray, // OutputType
   DenseNDArray, // ErrorsType
-  List<EncodedSentence>, // InputErrorsType
-  HANParameters // ParamsType
+  List<EncodedSentence> // InputErrorsType
   > {
 
   /**
@@ -75,7 +75,7 @@ internal class HANClassifierSingle(
    *
    * @return the parameters errors
    */
-  override fun getParamsErrors(copy: Boolean): HANParameters = this.encoder.getParamsErrors(copy)
+  override fun getParamsErrors(copy: Boolean): ParamsErrorsList = this.encoder.getParamsErrors(copy)
 
   /**
    * @return the hierarchy group built from this list of sentences
