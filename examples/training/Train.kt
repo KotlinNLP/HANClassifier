@@ -116,7 +116,7 @@ fun main(args: Array<String>) = mainBody {
  *
  * @param sentences the list of sentences
  */
-fun EmbeddingsMap<String>.addAll(sentences: List<Sentence<FormToken>>) {
+private fun EmbeddingsMap<String>.addAll(sentences: List<Sentence<FormToken>>) {
 
   sentences.forEach { sentence ->
     sentence.tokens.forEach { token ->
