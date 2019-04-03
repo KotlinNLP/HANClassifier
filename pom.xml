@@ -62,8 +62,8 @@
         <dokka.version>0.9.16</dokka.version>
         <klaxon.version>3.0.5</klaxon.version>
         <linguisticdescription.version>0.11.0</linguisticdescription.version>
-        <tokensencoder.version>0.5.1</tokensencoder.version>
-        <simplednn.version>0.13.0</simplednn.version>
+        <tokensencoder.version>0.5.2</tokensencoder.version>
+        <simplednn.version>0.13.1</simplednn.version>
         <utils.version>2.1.1</utils.version>
     </properties>
 
