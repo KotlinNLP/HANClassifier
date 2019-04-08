@@ -31,8 +31,8 @@ data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) : Serializable {
   val depth: Int = this.classes.values.asSequence().map { 1 + (it?.depth ?: 0) }.max()!!
 
   /**
-   * A classes configuration is considered complete if it defines a complete classes set, sequential and starting
-   * from 1.
+   * A classes configuration is considered complete if it defines a complete classes set (sequential and starting
+   * from 0).
    *
    * @return true if this classes configuration is complete, otherwise false
    */
