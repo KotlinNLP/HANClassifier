@@ -9,8 +9,11 @@ package corpus
 
 /**
  * Tokenize a corpus containing plain texts, to use it as dataset for the HAN classifier.
- * The first argument is the file name of the NeuralTokenizer model, the second one of the input corpus and the third
- * one is the output file name.
+ *
+ * Command line arguments:
+ *  1. The filename of the NeuralTokenizer model
+ *  2. The filename of the input corpus
+ *  3. The output filename.
  */
 fun main(args: Array<String>) {
 
