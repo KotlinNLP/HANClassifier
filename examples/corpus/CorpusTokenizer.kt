@@ -13,6 +13,7 @@ import com.beust.klaxon.Parser
 import com.kotlinnlp.neuraltokenizer.NeuralTokenizer
 import com.kotlinnlp.neuraltokenizer.NeuralTokenizerModel
 import com.kotlinnlp.neuraltokenizer.Sentence
+import com.kotlinnlp.utils.getLinesCount
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import java.io.*
 
@@ -48,7 +49,7 @@ internal class CorpusTokenizer(tokenizerModelFilename: String) {
 
     val inputFile = File(inputFilename)
     val outputFile = File(outputFilename)
-    val progress = ProgressIndicatorBar(total = inputFile.reader().getLinesCount())
+    val progress = ProgressIndicatorBar(total = getLinesCount(inputFilename))
 
     println("Input corpus: '$inputFilename'")
     println("Output file: '$outputFilename'")
@@ -86,18 +87,6 @@ internal class CorpusTokenizer(tokenizerModelFilename: String) {
     } else {
       null
     }
-  }
-
-  /**
-   * @return the number of lines of this input stream
-   */
-  private fun InputStreamReader.getLinesCount(): Int {
-
-    var linesCount = 0
-
-    this.forEachLine { linesCount++ }
-
-    return linesCount
   }
 
   /**
