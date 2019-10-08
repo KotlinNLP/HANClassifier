@@ -22,12 +22,12 @@ internal class CommandLineArguments(args: Array<String>) {
   private val parser = ArgParser(args)
 
   /**
-   * The file path of the multi-level classifiers serialized model.
+   * The file path of the HAN classifier serialized model.
    */
-  val classifiersModelPath: String by parser.storing(
+  val classifierModelPath: String by parser.storing(
     "-c",
-    "--classifiers-model-path",
-    help="the file path of the multi-level classifiers serialized model"
+    "--classifier-model-path",
+    help="the file path of the HAN classifier serialized model"
   )
 
   /**

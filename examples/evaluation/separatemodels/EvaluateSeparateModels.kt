@@ -27,7 +27,7 @@ fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
 
-  val model: HANClassifierModel = parsedArgs.classifiersModelPath.let {
+  val model: HANClassifierModel = parsedArgs.classifierModelPath.let {
     println("Loading HAN classifier model from '$it'...")
     HANClassifierModel.load(FileInputStream(File(it)))
   }
