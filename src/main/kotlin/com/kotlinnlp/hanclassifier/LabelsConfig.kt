@@ -21,7 +21,7 @@ import java.io.File
  */
 data class LabelsConfig(
   val labels: List<String>,
-  @Json(name = "sublevels") val subLevels: List<LabelsConfig?>?
+  @Json(name = "sublevels") val subLevels: List<LabelsConfig?>? = null
 ) {
 
   /**
