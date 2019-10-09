@@ -18,7 +18,7 @@ import java.io.File
  * @property subLevels the labels configurations of the sub-levels, one for each class at the related index (null if the
  *                     related class has no sub-levels)
  */
-data class LabelsConfig(val labels: List<String>, val subLevels: List<LabelsConfig?>) {
+data class LabelsConfig(val labels: List<String>, val subLevels: List<LabelsConfig?>?) {
 
   /**
    * Factory object.
@@ -58,7 +58,7 @@ data class LabelsConfig(val labels: List<String>, val subLevels: List<LabelsConf
 
     if (indices.size > 1)
       indices.take(indices.size - 1).forEach { classIndex ->
-        curLevelConfig = curLevelConfig.subLevels[classIndex]!!
+        curLevelConfig = curLevelConfig.subLevels!![classIndex]!!
       }
 
     return curLevelConfig.labels[indices.last()]
@@ -73,10 +73,13 @@ data class LabelsConfig(val labels: List<String>, val subLevels: List<LabelsConf
 
     if (classesConfig.classes.keys.size != this.labels.size) return false
 
-    return this.subLevels.withIndex().all { (index, subLevel) ->
-      val subClassesConfig: ClassesConfig? = classesConfig.classes[index]
-      (subLevel == null && subClassesConfig == null) ||
-        (subLevel != null && subClassesConfig != null && subLevel.isCompatible(subClassesConfig))
-    }
+    return if (this.subLevels == null)
+      classesConfig.isEmpty
+    else
+      this.subLevels.withIndex().all { (index, subLevel) ->
+        val subClassesConfig: ClassesConfig? = classesConfig.classes[index]
+        (subLevel == null && subClassesConfig == null) ||
+          (subLevel != null && subClassesConfig != null && subLevel.isCompatible(subClassesConfig))
+      }
   }
 }
