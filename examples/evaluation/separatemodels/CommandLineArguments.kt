@@ -24,9 +24,9 @@ internal class CommandLineArguments(args: Array<String>) {
   /**
    * The file path of the HAN classifier serialized model.
    */
-  val classifierModelPath: String by parser.storing(
-    "-c",
-    "--classifier-model-path",
+  val modelPath: String by parser.storing(
+    "-m",
+    "--model-path",
     help="the file path of the HAN classifier serialized model"
   )
 
