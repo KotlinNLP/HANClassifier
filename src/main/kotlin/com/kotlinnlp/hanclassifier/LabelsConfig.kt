@@ -7,6 +7,7 @@
 
 package com.kotlinnlp.hanclassifier
 
+import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import java.io.File
@@ -18,7 +19,10 @@ import java.io.File
  * @property subLevels the labels configurations of the sub-levels, one for each class at the related index (null if the
  *                     related class has no sub-levels)
  */
-data class LabelsConfig(val labels: List<String>, val subLevels: List<LabelsConfig?>?) {
+data class LabelsConfig(
+  val labels: List<String>,
+  @Json(name = "sublevels") val subLevels: List<LabelsConfig?>?
+) {
 
   /**
    * Factory object.
