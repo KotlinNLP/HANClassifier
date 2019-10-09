@@ -31,6 +31,13 @@ data class ClassesConfig(val classes: Map<Int, ClassesConfig?>) : Serializable {
   val depth: Int = this.classes.values.asSequence().map { 1 + (it?.depth ?: 0) }.max()!!
 
   /**
+   * A classes configuration is considered empty if all its classes has not sub-classes.
+   *
+   * @return true if this classes configuration is empty, otherwise false
+   */
+  val isEmpty: Boolean = this.classes.values.all { it == null }
+
+  /**
    * A classes configuration is considered complete if it defines a complete classes set (sequential and starting
    * from 0).
    *
