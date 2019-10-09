@@ -7,8 +7,9 @@
 
 package com.kotlinnlp.hanclassifier
 
-import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Klaxon
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
+import java.io.File
 
 /**
  * The configuration of a hierarchy of labels (associated to the classes indices) for the classification.
@@ -25,20 +26,17 @@ data class LabelsConfig(val labels: List<String>, val subLevels: List<LabelsConf
   companion object {
 
     /**
-     * Build a labels configuration from a JSON object with the following template:
+     * Build a labels configuration from a JSON file containing a JSON object with the following template:
      * {
      *  "labels": ["Label 0 Name", "Label 1 Name", "Label 2 Name"]
      *  "sublevels": [{ /* sublevel 0 config */ }, null, { /* sublevel 2 config */ }]
      * }
      *
-     * @param jsonObject a JSON object representing a labels configuration
+     * @param filePath the path of the JSON file with a labels configuration
      *
      * @return
      */
-    fun fromJSON(jsonObject: JsonObject): LabelsConfig = LabelsConfig(
-      labels = jsonObject.array("labels")!!,
-      subLevels = jsonObject.array<JsonObject?>("sublevels")!!.map { obj -> obj?.let { LabelsConfig.fromJSON(it) } }
-    )
+    fun fromFile(filePath: String): LabelsConfig = Klaxon().parse(File(filePath))!!
   }
 
   /**

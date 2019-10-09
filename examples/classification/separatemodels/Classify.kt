@@ -7,8 +7,6 @@
 
 package classification.separatemodels
 
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
 import com.kotlinnlp.hanclassifier.HANClassifier
 import com.kotlinnlp.hanclassifier.HANClassifierModel
 import com.kotlinnlp.hanclassifier.LabelsConfig
@@ -57,7 +55,7 @@ fun main(args: Array<String>) = mainBody {
 
   val labelsConfig: LabelsConfig? = parsedArgs.labelsConfigPath?.let {
     println("Loading labels configuration from '$it'...")
-    LabelsConfig.fromJSON(Parser().parse(it) as JsonObject)
+    LabelsConfig.fromFile(it)
   }
 
   var inputText = readInput()
