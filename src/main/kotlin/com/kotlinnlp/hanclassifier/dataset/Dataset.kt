@@ -61,11 +61,11 @@ class Dataset(
 
     require(this.classesConfig.isComplete()) { "The training dataset must contain all the possible classes." }
 
-    require(this.getClassesConfig(this.validation, autoComplete = false).isCompatible(this.classesConfig)) {
+    require(this.getClassesConfig(this.validation, autoComplete = autoComplete).isCompatible(this.classesConfig)) {
       "The classes defined in the validation dataset must be compatible with the training set."
     }
 
-    require(this.getClassesConfig(this.test, autoComplete = false).isCompatible(this.classesConfig)) {
+    require(this.getClassesConfig(this.test, autoComplete = autoComplete).isCompatible(this.classesConfig)) {
       "The classes defined in the test dataset must be compatible with the training set."
     }
   }
