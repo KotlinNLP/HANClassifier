@@ -76,7 +76,7 @@ class HANClassifier(
     val output: List<DenseNDArray> = listOf(prediction)
 
     val predictedClass: Int = prediction.argMaxIndex()
-    val subLevelClassifier: HANClassifier.LevelClassifier? = levelClassifier.subLevels[predictedClass]
+    val subLevelClassifier: LevelClassifier? = levelClassifier.subLevels[predictedClass]
     val goToSubLevel: Boolean = levelIndex == 0 || predictedClass < prediction.lastIndex // lastIndex == 'stop-level'
 
     return if (subLevelClassifier != null && goToSubLevel)
