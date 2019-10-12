@@ -54,13 +54,13 @@ data class LabelsConfig(
 
     require(classesPrediction.isNotEmpty())
 
-    var curLevelConfig: LabelsConfig = this
-
     // Note: only the last can be a 'stop-level prediction.
     val indices: List<Int> = classesPrediction
       .map { it.argMaxIndex() }
       // remove the 'stop-level' predictions (the last index predicted in a sub-level)
       .filterIndexed { level, classIndex -> level == 0 || classIndex != classesPrediction[level].lastIndex }
+
+    var curLevelConfig: LabelsConfig = this
 
     if (indices.size > 1)
       indices.take(indices.size - 1).forEach { classIndex ->
