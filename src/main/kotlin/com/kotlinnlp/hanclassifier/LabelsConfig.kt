@@ -71,6 +71,24 @@ data class LabelsConfig(
   }
 
   /**
+   * Get the level of a class predicted.
+   *
+   * @param classesPrediction the predictions of a classes hierarchy made by the [HANClassifier]
+   *
+   * @return the class level (starting from 1, which is the top level)
+   */
+  fun getLevel(classesPrediction: List<DenseNDArray>): Int {
+
+    require(classesPrediction.isNotEmpty())
+
+    return classesPrediction
+      .map { it.argMaxIndex() }
+      // remove the 'stop-level' predictions (the last index predicted in a sub-level)
+      .filterIndexed { level, classIndex -> level == 0 || classIndex != classesPrediction[level].lastIndex }
+      .size
+  }
+
+  /**
    * @param classesConfig a classes configuration
    *
    * @return true if this labels configuration is compatible with the given classes configuration, otherwise false
