@@ -54,12 +54,7 @@ data class LabelsConfig(
 
     require(classesPrediction.isNotEmpty())
 
-    // Note: only the last can be a 'stop-level prediction.
-    val indices: List<Int> = classesPrediction
-      .map { it.argMaxIndex() }
-      // remove the 'stop-level' predictions (the last index predicted in a sub-level)
-      .filterIndexed { level, classIndex -> level == 0 || classIndex != classesPrediction[level].lastIndex }
-
+    val indices: List<Int> = this.getIndicesHierarchy(classesPrediction)
     var curLevelConfig: LabelsConfig = this
 
     if (indices.size > 1)
@@ -81,12 +76,22 @@ data class LabelsConfig(
 
     require(classesPrediction.isNotEmpty())
 
-    return classesPrediction
+    return this.getIndicesHierarchy(classesPrediction).size
+  }
+
+  /**
+   * Get the indices hierarchy of a class predicted, from the top level.
+   *
+   * @param classesPrediction the predictions of a classes hierarchy made by the [HANClassifier]
+   *
+   * @return the indices hierarchy of the class predicted
+   */
+  fun getIndicesHierarchy(classesPrediction: List<DenseNDArray>): List<Int> =
+    // Note: only the last can be a 'stop-level prediction.
+    classesPrediction
       .map { it.argMaxIndex() }
       // remove the 'stop-level' predictions (the last index predicted in a sub-level)
       .filterIndexed { level, classIndex -> level == 0 || classIndex != classesPrediction[level].lastIndex }
-      .size
-  }
 
   /**
    * @param classesConfig a classes configuration
