@@ -48,13 +48,22 @@ data class LabelsConfig(
    *
    * @param classesPrediction the predictions of a classes hierarchy made by the [HANClassifier]
    *
-   * @return the label of to the given prediction
+   * @return the label of the given prediction
    */
-  fun getLabel(classesPrediction: List<DenseNDArray>): String {
+  fun getLabel(classesPrediction: List<DenseNDArray>): String =
+    this.getLabelByIndices(indices = this.getIndicesHierarchy(classesPrediction))
 
-    require(classesPrediction.isNotEmpty())
+  /**
+   * Get the label corresponding to a indices hierarchy.
+   *
+   * @param indices the indices of a classes hierarchy, starting from the top level
+   *
+   * @return the label corresponding to the given indices hierarchy
+   */
+  fun getLabelByIndices(indices: List<Int>): String {
 
-    val indices: List<Int> = this.getIndicesHierarchy(classesPrediction)
+    require(indices.isNotEmpty())
+
     var curLevelConfig: LabelsConfig = this
 
     if (indices.size > 1)
