@@ -61,10 +61,7 @@
         <kotlin.version>1.3.31</kotlin.version>
         <dokka.version>0.9.16</dokka.version>
         <klaxon.version>3.0.5</klaxon.version>
-        <linguisticdescription.version>0.12.2</linguisticdescription.version>
         <tokensencoder.version>0.5.4</tokensencoder.version>
-        <simplednn.version>0.13.3</simplednn.version>
-        <utils.version>2.1.4</utils.version>
     </properties>
 
     <repositories>
@@ -207,26 +204,8 @@
 
         <dependency>
             <groupId>com.kotlinnlp</groupId>
-            <artifactId>linguisticdescription</artifactId>
-            <version>${linguisticdescription.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.kotlinnlp</groupId>
             <artifactId>tokensencoder</artifactId>
             <version>${tokensencoder.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.kotlinnlp</groupId>
-            <artifactId>simplednn</artifactId>
-            <version>${simplednn.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.kotlinnlp</groupId>
-            <artifactId>utils</artifactId>
-            <version>${utils.version}</version>
         </dependency>
     </dependencies>
 </project>
