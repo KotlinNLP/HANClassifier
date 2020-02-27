@@ -13,7 +13,6 @@ import com.kotlinnlp.utils.getLinesCount
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import com.kotlinnlp.linguisticdescription.sentence.Sentence as SentenceInterface
 import java.io.File
-import java.lang.StringBuilder
 
 /**
  * The corpus reader.
@@ -46,15 +45,15 @@ class CorpusReader(private val verbose: Boolean = true) {
   fun read(filename: String): List<Example> {
 
     val examples = mutableListOf<Example>()
-    val parser = Parser()
+    val parser = Klaxon()
     val progress = ProgressIndicatorBar(getLinesCount(filename))
 
     File(filename).reader().forEachLine { line ->
 
       progress.tick()
 
-      val parsedExample = parser.parse(StringBuilder(line)) as JsonObject
-      val sentences = parsedExample.array<JsonArray<String>>("text")!!
+      val parsedExample: JsonObject = parser.parseJsonObject(line.reader())
+      val sentences: JsonArray<JsonArray<String>> = parsedExample.array("text")!!
       val classes: List<Int> = parsedExample.array("classes")!!
 
       require(classes.all { it >= 0 }) { "The class index must be >= 0" }

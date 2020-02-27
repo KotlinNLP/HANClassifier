@@ -9,7 +9,7 @@ package corpus
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
+import com.beust.klaxon.Klaxon
 import com.kotlinnlp.neuraltokenizer.NeuralTokenizer
 import com.kotlinnlp.neuraltokenizer.NeuralTokenizerModel
 import com.kotlinnlp.neuraltokenizer.Sentence
@@ -34,7 +34,7 @@ internal class CorpusTokenizer(tokenizerModelFilename: String) {
   /**
    * The JSON parser.
    */
-  private val jsonParser: Parser = Parser()
+  private val jsonParser = Klaxon()
 
   /**
    * Convert each example of a corpus from the format 1 to the format 2, tokenizing the texts and removing the examples
@@ -73,7 +73,7 @@ internal class CorpusTokenizer(tokenizerModelFilename: String) {
    */
   private fun convertLine(line: String): JsonObject? {
 
-    val jsonExample: JsonObject = this.jsonParser.parse(StringBuilder(line)) as JsonObject
+    val jsonExample: JsonObject = this.jsonParser.parseJsonObject(line.reader())
     val text: String = jsonExample.string("text")!!
 
     val tokenizedText: List<Sentence> = this.tokenizer.tokenize(text).filter { it.tokens.isNotEmpty() }

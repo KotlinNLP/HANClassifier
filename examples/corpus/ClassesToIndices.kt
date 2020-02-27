@@ -8,11 +8,10 @@
 package corpus
 
 import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
+import com.beust.klaxon.Klaxon
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import com.kotlinnlp.utils.getLinesCount
 import java.io.File
-import java.lang.StringBuilder
 
 /**
  * Convert the classes names of a one-level corpus to indices.
@@ -32,7 +31,7 @@ fun main(args: Array<String>) {
 
   val inputFile = File(inputFilename)
   val outputFile = File(outputFilename)
-  val jsonParser = Parser()
+  val jsonParser = Klaxon()
   val progress = ProgressIndicatorBar(total = getLinesCount(inputFilename))
   val categoriesMapping: MutableMap<String, Int> = mutableMapOf()
 
@@ -43,7 +42,7 @@ fun main(args: Array<String>) {
 
   inputFile.reader().forEachLine { line ->
 
-    val example: JsonObject = jsonParser.parse(StringBuilder(line)) as JsonObject
+    val example: JsonObject = jsonParser.parseJsonObject(line.reader())
     val category: String = example.string("class")!!
     val index: Int = categoriesMapping.getOrPut(category) { categoriesMapping.size }
 
