@@ -18,7 +18,7 @@ import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.tokensencoder.TokensEncoder
-import com.kotlinnlp.utils.ExamplesIndices
+import com.kotlinnlp.utils.ShuffledIndices
 import com.kotlinnlp.utils.Shuffler
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import java.io.File
@@ -158,7 +158,7 @@ class Trainer(
     val progress = ProgressIndicatorBar(trainingSet.size)
     var examplesCount = 0
 
-    for (exampleIndex in ExamplesIndices(size = trainingSet.size, shuffler = shuffler)) {
+    for (exampleIndex in ShuffledIndices(size = trainingSet.size, shuffler = shuffler)) {
 
       examplesCount++
       progress.tick()
