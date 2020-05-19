@@ -92,7 +92,7 @@ class MultiLevelHANModel(
       hierarchySize = 2,
       inputSize = this.tokenEncodingSize,
       inputType = LayerType.Input.Dense,
-      biRNNsActivation = Tanh(),
+      biRNNsActivation = Tanh,
       biRNNsConnectionType = this.recurrentConnectionType,
       attentionSize = this.attentionSize,
       outputSize = config.classes.size + (if (level > 0) 1 else 0), // include the 'no-class' for lower levels

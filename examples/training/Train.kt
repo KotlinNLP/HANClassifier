@@ -66,7 +66,7 @@ fun main(args: Array<String>) = mainBody {
       EmbeddingsEncoderModel.Base(embeddingsMap = embeddingsMap, embeddingKeyExtractor = NormWordKeyExtractor()),
     optimizeInput = optimizeEmbeddings,
     tokenEncodingSize = 50,
-    activationFunction = Tanh())
+    activationFunction = Tanh)
 
   val model = HANClassifierModel(
     name = parsedArgs.modelName,
