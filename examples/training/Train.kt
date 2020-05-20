@@ -18,7 +18,7 @@ import com.kotlinnlp.tokensencoder.embeddings.keyextractor.NormWordKeyExtractor
 import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
-import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.radam.RADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.tokensencoder.embeddings.EmbeddingsEncoderModel
 import com.kotlinnlp.tokensencoder.reduction.ReductionEncoderModel
@@ -79,7 +79,7 @@ fun main(args: Array<String>) = mainBody {
 
   Trainer(
     model = model,
-    classifierUpdateMethod = ADAMMethod(stepSize = 0.001),
+    classifierUpdateMethod = RADAMMethod(stepSize = 0.001),
     tokensEncoderUpdateMethod = AdaGradMethod(learningRate = 0.1),
     useDropout = true
   ).train(
