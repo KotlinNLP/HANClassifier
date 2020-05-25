@@ -87,5 +87,5 @@ internal class HANClassifierSingle(
    * @return the hierarchy sequence built from sentence
    */
   private fun EncodedSentence.toHierarchySequence(): HierarchySequence<DenseNDArray> =
-    HierarchySequence(*this.tokens.map {it }.toTypedArray())
+    HierarchySequence(*this.tokens.map { it }.toTypedArray())
 }
