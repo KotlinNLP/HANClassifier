@@ -19,7 +19,7 @@
         <klaxon.version>5.2</klaxon.version>
         <hanclassifier.version>0.6.5</hanclassifier.version>
         <neuraltokenizer.version>0.4.8</neuraltokenizer.version>
-        <linguisticdescription.version>0.12.1</linguisticdescription.version>
+        <linguisticdescription.version>0.12.2</linguisticdescription.version>
         <tokensencoder.version>0.5.4</tokensencoder.version>
         <simplednn.version>0.14.0</simplednn.version>
         <utils.version>2.1.4</utils.version>
