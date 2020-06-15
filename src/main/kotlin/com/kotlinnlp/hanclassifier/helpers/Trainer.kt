@@ -31,14 +31,18 @@ import java.io.FileOutputStream
  * @param tokensEncoderUpdateMethod the update method for the parameters of the tokens encoder (null if must not be
  *                                  trained)
  * @param classifierUpdateMethod the update method for the parameters of the HAN classifier
- * @param useDropout whether to apply the dropout of the input
+ * @param biRNNDropout the probability of dropout for the BiRNNs (default 0.0)
+ * @param attentionDropout the probability of attention dropout (default 0.0)
+ * @param outputDropout the probability of output dropout (default 0.0)
  * @param saveClassifiersOnly whether to serialize and save only the multi-level HAN classifiers
  */
 class Trainer(
   private val model: HANClassifierModel,
   tokensEncoderUpdateMethod: UpdateMethod<*>? = null,
   private val classifierUpdateMethod: UpdateMethod<*>,
-  useDropout: Boolean,
+  biRNNDropout: Double = 0.0,
+  attentionDropout: Double = 0.0,
+  outputDropout: Double = 0.0,
   private val saveClassifiersOnly: Boolean = false
 ) {
 
@@ -63,7 +67,12 @@ class Trainer(
   /**
    * A HAN classifier with the given model.
    */
-  private val classifier = HANClassifier(model = this.model, useDropout = useDropout, propagateToInput = true)
+  private val classifier = HANClassifier(
+    model = this.model,
+    biRNNDropout = biRNNDropout,
+    attentionDropout = attentionDropout,
+    outputDropout = outputDropout,
+    propagateToInput = true)
 
   /**
    * The helper for the validation of the [classifier].
@@ -73,7 +82,7 @@ class Trainer(
   /**
    * A pool of tokens encoders to encode the input.
    */
-  private val tokensEncodersPool = TokensEncodersPool(model = this.model.tokensEncoder, useDropout = useDropout)
+  private val tokensEncodersPool = TokensEncodersPool(model = this.model.tokensEncoder)
 
   /**
    * The optimizer of the tokens encoder.

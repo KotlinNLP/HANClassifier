@@ -16,12 +16,16 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
  * A classifier based on Hierarchic Attention Networks, that works on a hierarchical structure of classes.
  *
  * @param model the model of this [HANClassifier]
- * @param useDropout whether to apply the dropout during the forward (default = false)
+ * @param biRNNDropout the probability of dropout for the BiRNNs (default 0.0)
+ * @param attentionDropout the probability of attention dropout (default 0.0)
+ * @param outputDropout the probability of output dropout (default 0.0)
  * @param propagateToInput whether to propagate the errors to the input during the backward (default = false)
  */
 class HANClassifier(
   val model: HANClassifierModel,
-  val useDropout: Boolean = false,
+  private val biRNNDropout: Double = 0.0,
+  private val attentionDropout: Double = 0.0,
+  private val outputDropout: Double = 0.0,
   val propagateToInput: Boolean = false
 ) {
 
@@ -41,7 +45,7 @@ class HANClassifier(
   /**
    * A pool of tokens encoders to encode the input.
    */
-  private val tokensEncodersPool = TokensEncodersPool(model = this.model.tokensEncoder, useDropout = false)
+  private val tokensEncodersPool = TokensEncodersPool(model = this.model.tokensEncoder)
 
   /**
    * Classify the given [sentences].
@@ -94,7 +98,9 @@ class HANClassifier(
     LevelClassifier(
       classifier = HANClassifierSingle(
         han = levelModel.han,
-        useDropout = this.useDropout,
+        biRNNDropout = this.biRNNDropout,
+        attentionDropout = this.attentionDropout,
+        outputDropout = this.outputDropout,
         propagateToInput = this.propagateToInput),
       subLevels = levelModel.subLevels.mapValues { it.value?.let { model -> this.buildLevelClassifier(model) } })
 }

@@ -32,16 +32,13 @@ class Validator(private val model: HANClassifierModel, private val verbose: Bool
   inner class ValidationInfo(
     val metrics: List<MetricCounter> = List(size = model.classesConfig.depth, init = { MetricCounter() }),
     val confusionMatrix: ConfusionMatrix = ConfusionMatrix(
-      labels = List(size = model.classesConfig.classes.size, init = { i -> i.toString() }))
+      labels = List(size = this.model.classesConfig.classes.size, init = { i -> i.toString() }))
   )
 
   /**
    * The classifier initialized with the model.
    */
-  private val classifier = HANClassifier(
-    model = model,
-    useDropout = false,
-    propagateToInput = false)
+  private val classifier = HANClassifier(model = this.model, propagateToInput = false)
 
   /**
    * The info filled during the current validation.

@@ -80,8 +80,7 @@ fun main(args: Array<String>) = mainBody {
   Trainer(
     model = model,
     classifierUpdateMethod = RADAMMethod(stepSize = 0.001),
-    tokensEncoderUpdateMethod = AdaGradMethod(learningRate = 0.1),
-    useDropout = true
+    tokensEncoderUpdateMethod = AdaGradMethod(learningRate = 0.1)
   ).train(
     trainingSet = dataset.training,
     validationSet = dataset.validation,

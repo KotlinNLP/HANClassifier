@@ -16,12 +16,16 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
  * A classifier based on Hierarchic Attention Networks.
  *
  * @param han a HAN model
- * @param useDropout whether to apply the dropout during the forward (default = false)
+ * @param biRNNDropout the probability of dropout for the BiRNNs (default 0.0)
+ * @param attentionDropout the probability of attention dropout (default 0.0)
+ * @param outputDropout the probability of output dropout (default 0.0)
  * @param propagateToInput whether to propagate the errors to the input during the backward (default = false)
  */
 internal class HANClassifierSingle(
   val han: HAN,
-  override val useDropout: Boolean = false,
+  biRNNDropout: Double = 0.0,
+  attentionDropout: Double = 0.0,
+  outputDropout: Double = 0.0,
   override val propagateToInput: Boolean = false,
   override val id: Int = 0
 ) : NeuralProcessor<
@@ -36,7 +40,9 @@ internal class HANClassifierSingle(
    */
   private val encoder = HANEncoder<DenseNDArray>(
     model = this.han,
-    useDropout = this.useDropout,
+    biRNNDropout = biRNNDropout,
+    attentionDropout = attentionDropout,
+    outputDropout = outputDropout,
     propagateToInput = this.propagateToInput)
 
   /**
