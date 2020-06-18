@@ -17,12 +17,12 @@
         <xenocom.version>0.0.5</xenocom.version>
         <argparser.version>2.0.7</argparser.version>
         <klaxon.version>5.2</klaxon.version>
-        <hanclassifier.version>0.6.5</hanclassifier.version>
-        <neuraltokenizer.version>0.4.8</neuraltokenizer.version>
-        <linguisticdescription.version>0.12.2</linguisticdescription.version>
-        <tokensencoder.version>0.5.4</tokensencoder.version>
-        <simplednn.version>0.14.0</simplednn.version>
-        <utils.version>2.1.4</utils.version>
+        <hanclassifier.version>0.6.6</hanclassifier.version>
+        <neuraltokenizer.version>0.4.9</neuraltokenizer.version>
+        <linguisticdescription.version>0.12.3</linguisticdescription.version>
+        <tokensencoder.version>0.5.5</tokensencoder.version>
+        <simplednn.version>0.14.1</simplednn.version>
+        <utils.version>2.1.5</utils.version>
     </properties>
 
     <repositories>
